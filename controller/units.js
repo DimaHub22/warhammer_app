@@ -5,9 +5,9 @@ class Unit {
     async createUnit(req, res){
         try {
 
-            const {categoryId, name, pts,image} = req.body
+            const {categoryId, name, pts,image,race} = req.body
             const newUnit = await new Units({
-                categoryId, name, pts,image
+                categoryId, name, pts,image,race
             })
 
             await newUnit.save()
