@@ -5,15 +5,13 @@ class Unit {
     async createUnit(req, res){
         try {
 
-            const {categoryId, name, pts,image,race} = req.body
-            const newUnit = await new Units({
-                categoryId, name, pts,image,race
+            const {categoryId, name, pts, image, race} = req.body
+            const newUnit = new Units({
+                categoryId, name, pts, image, race
             })
 
             await newUnit.save()
             res.status(201).json({error: false, message: "Unit successfully created"})
-
-
 
         }catch (e) {
             console.log(e)
@@ -38,6 +36,21 @@ class Unit {
 
             const units = await Units.find({categoryId:req.query.category, race:req.query.idCodex})
             res.status(200).json(units)
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async updateUnit(req,res){
+        try {
+
+            await Units.findOneAndUpdate(
+                {_id:req.params.id},
+                {$set:req.body}
+            )
+            res.status(200).json({error: false, message: "Update"})
 
         }catch (e) {
             console.log(e)
