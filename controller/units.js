@@ -58,6 +58,18 @@ class Unit {
         }
     }
 
+    async deleteUnit(req,res){
+        try {
+            await Units.deleteOne({_id: req.params.id})
+
+            res.status(200).json({error: false, message: "Delete"})
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
 
 }
 

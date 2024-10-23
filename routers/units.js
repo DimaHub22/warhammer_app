@@ -8,7 +8,7 @@ router.get('/', Unit.getUnits)
 router.get('/units', Unit.getUnitsCategory)
 router.get('/:id')
 router.patch('/:id', Unit.updateUnit)
-router.delete('/:id')
+router.delete('/:id', Unit.deleteUnit)
 
 
 module.exports = router
