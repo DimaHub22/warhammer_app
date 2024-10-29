@@ -70,6 +70,24 @@ class Unit {
         }
     }
 
+    async searchUnit(req,res){
+        try {
+            const {query} = req.query
+
+            if(!query){
+               return res.status(400).json({error:true, message:"Not found"})
+            }
+
+            const units = await Units.find(
+                {'name':{"$regex": query}}
+            )
+            res.json(units)
+
+        }catch (e) {
+
+        }
+    }
+
 
 }
 
