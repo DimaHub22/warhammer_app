@@ -12,7 +12,8 @@ class AddUnit {
                 idCodex,name,image
             })
             await newUnit.save()
-            res.status(201).json({error: false, message: 'Added unit access'})
+
+            res.status(201).json(newUnit)
 
         }catch (e) {
             console.log(e)
