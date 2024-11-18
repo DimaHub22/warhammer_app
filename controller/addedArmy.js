@@ -6,7 +6,6 @@ class AddArmy  {
     async addUnitToArmy(req,res){
         try {
 
-            console.log(req.body)
             const {unitId,categoryId,name,pts,image,power,description,race,codexId} = req.body
             const unit = await new AddedArmy({
                 unitId,codexId,categoryId,name,pts,image,power,description,race

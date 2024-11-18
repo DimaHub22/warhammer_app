@@ -8,7 +8,10 @@ const Unit = new Schema({
     },
     name:String,
     pts:Number,
-    image:String,
+    image:{
+        type: String,
+        default: ''
+    },
     power:{
         type:Boolean,
         default:false
