@@ -1,12 +1,13 @@
 const Units = require('../models/Units')
-const fs = require('fs/promises');
+const fsPromises = require('fs/promises');
+const fs = require('fs');
 
 class Unit {
 
     async createUnit(req, res) {
         try {
 
-            const {categoryId, name, pts, image, race} = req.body
+            const {categoryId, name, pts, image, race,keywords} = req.body
 
 
             const newUnit = new Units({
@@ -14,7 +15,8 @@ class Unit {
                 name,
                 pts,
                 image: req.file ? req.file.path : '',
-                race
+                race,
+                keywords
             })
 
             await newUnit.save()
@@ -53,12 +55,17 @@ class Unit {
     async updateUnit(req, res) {
 
         try {
-            const update = {
+            let update = {
                 categoryId: req.body.categoryId,
                 name: req.body.name,
                 pts: req.body.pts,
-                image: req.file ? req.file.path : '',
-                race: req.body.race
+                // image: req.file ? req.file.path : '',
+                race: req.body.race,
+                keywords:req.body.keywords
+            }
+
+            if(req.file){
+                update.image = req.file.path
             }
 
 
@@ -78,13 +85,32 @@ class Unit {
         try {
 
             const unit = await Units.findOne({_id: req.params.id})
-
+            console.log(unit)
             if (unit) {
+                const imageName = unit.image.replace(/uploads/g, '').slice(1)
 
-                await fs.rm(`./${unit.image}`);
+                fs.access(`${imageName}`, async function(error){
+
+                    if (error) {
+
+                        console.log("Файл не найден");
+                        await Units.deleteOne({_id: req.params.id})
+
+                    } else {
+                        await fsPromises.rm(`./${unit.image}`);
+                        await Units.deleteOne({_id: req.params.id})
+                        console.log("Файл найден");
+
+                    }
+
+                });
+
+
+
+
             }
 
-            await Units.deleteOne({_id: req.params.id})
+
 
             res.status(200).json({error: false, message: "Delete"})
 

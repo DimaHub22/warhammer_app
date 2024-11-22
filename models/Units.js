@@ -28,7 +28,9 @@ const Unit = new Schema({
         type: String,
         default: ''
     },
-    race:String
+    race:String,
+
+    keywords:String
 
 })
 

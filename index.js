@@ -8,14 +8,15 @@ const categories = require('./routers/categories')
 const unit = require('./routers/units')
 const addedUnits = require('./routers/addedUnits')
 const addedArmy = require('./routers/addedArmy')
+const keyWords = require('./routers/keyWorlds')
 
 
 const PORT = process.env.PORT || 5000
 
 
 const app = express()
-app.use('/uploads', express.static('uploads'))
 app.use(cors());
+app.use('/uploads', express.static('uploads'))
 app.use(express.urlencoded({extended: true}))
 app.use(express.json())
 
@@ -24,6 +25,7 @@ app.use('/category',categories)
 app.use('/unit', unit)
 app.use('/addedUnits', addedUnits)
 app.use('/addedArmy', addedArmy)
+app.use('/keyWord', keyWords)
 
 
 const start = async () => {
