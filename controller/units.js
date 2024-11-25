@@ -1,4 +1,6 @@
 const Units = require('../models/Units')
+const AddedArmy = require('../models/AddedArmy')
+
 const fsPromises = require('fs/promises');
 const fs = require('fs');
 
@@ -7,7 +9,7 @@ class Unit {
     async createUnit(req, res) {
         try {
 
-            const {categoryId, name, pts, image, race,keywords} = req.body
+            const {categoryId, name, pts, image, race, keywords} = req.body
 
 
             const newUnit = new Units({
@@ -53,7 +55,6 @@ class Unit {
     }
 
     async updateUnit(req, res) {
-
         try {
             let update = {
                 categoryId: req.body.categoryId,
@@ -61,10 +62,10 @@ class Unit {
                 pts: req.body.pts,
                 // image: req.file ? req.file.path : '',
                 race: req.body.race,
-                keywords:req.body.keywords
+                keywords: req.body.keywords
             }
 
-            if(req.file){
+            if (req.file) {
                 update.image = req.file.path
             }
 
@@ -73,6 +74,25 @@ class Unit {
                 {_id: req.params.id},
                 {$set: update}
             )
+
+            const addedArmy = await AddedArmy.findOne({unitId: req.params.id})
+
+            if (addedArmy) {
+                let unit = {
+                    name: req.body.name,
+                    pts: req.body.pts,
+                }
+
+                if (req.file) {
+                    unit.image = req.file.path
+                }
+
+
+                await AddedArmy.findOneAndUpdate(
+                    {unitId: req.params.id},
+                    {$set: unit}
+                )
+            }
             res.status(200).json({error: false, message: "Update"})
 
         } catch (e) {
@@ -85,11 +105,11 @@ class Unit {
         try {
 
             const unit = await Units.findOne({_id: req.params.id})
-            console.log(unit)
+
             if (unit) {
                 const imageName = unit.image.replace(/uploads/g, '').slice(1)
 
-                fs.access(`${imageName}`, async function(error){
+                fs.access(`${imageName}`, async function (error) {
 
                     if (error) {
 
@@ -106,10 +126,7 @@ class Unit {
                 });
 
 
-
-
             }
-
 
 
             res.status(200).json({error: false, message: "Delete"})
