@@ -75,7 +75,7 @@ class Unit {
                 {$set: update}
             )
 
-            const addedArmy = await AddedArmy.findOne({unitId: req.params.id})
+            const addedArmy = await AddedArmy.find({unitId: req.params.id})
 
             if (addedArmy) {
                 let unit = {
@@ -88,7 +88,7 @@ class Unit {
                 }
 
 
-                await AddedArmy.findOneAndUpdate(
+                await AddedArmy.updateMany(
                     {unitId: req.params.id},
                     {$set: unit}
                 )
