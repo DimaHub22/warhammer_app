@@ -47,14 +47,23 @@ class KeyWord {
     }
 
     async updateKeyword(req,res){
+
         try {
             const keyword = {
                 keyword:req.body.keyword,
                 position:req.body.position
             }
+            const keyUp = await KeyWords.findOne({_id:req.params.id})
+            const key = await KeyWords.findOne({position:req.body.position})
 
-            await KeyWords.updateOne({_id:req.params.id},{$set:keyword})
+            if(keyUp && key){
+                await KeyWords.updateOne({_id:key._id},{$set:{position:keyUp.position}})
+                await KeyWords.updateOne({_id:req.params.id},{$set:keyword})
+            }else{
+                await KeyWords.updateOne({_id:req.params.id},{$set:keyword})
+            }
             res.status(200).json({error: false, message: "Update"})
+
 
         }catch (e) {
             console.log(e)
