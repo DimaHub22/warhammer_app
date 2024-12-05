@@ -10,9 +10,10 @@ router.get('/', Unit.getUnits)
 router.get('/search', Unit.searchUnit)
 router.get('/units', Unit.getUnitsCategory)
 router.get('/:id')
-
 router.patch('/:id', upload.single('image'), Unit.updateUnit)
 router.delete('/:id', Unit.deleteUnit)
+
+
 
 
 module.exports = router

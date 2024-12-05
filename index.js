@@ -9,6 +9,7 @@ const unit = require('./routers/units')
 const addedUnits = require('./routers/addedUnits')
 const addedArmy = require('./routers/addedArmy')
 const keyWords = require('./routers/keyWorlds')
+const model = require('./routers/models')
 
 
 const PORT = process.env.PORT || 5000
@@ -26,6 +27,7 @@ app.use('/unit', unit)
 app.use('/addedUnits', addedUnits)
 app.use('/addedArmy', addedArmy)
 app.use('/keyWord', keyWords)
+app.use('/model', model)
 
 
 const start = async () => {

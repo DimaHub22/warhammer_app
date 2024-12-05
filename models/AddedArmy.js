@@ -12,6 +12,9 @@ const AddedArmy = new Schema({
     },
     name:String,
     pts:Number,
+    model:{
+        type:Number,
+    },
     image:String,
     power:{
         type:Boolean,

@@ -7,7 +7,11 @@ const Unit = new Schema({
         required: true
     },
     name:String,
-    pts:Number,
+    pts:{
+        type:Number,
+        default: 0
+    },
+    ptsForModel:[{model:Number, pts:Number, checked:Boolean, position:Number}],
     image:{
         type: String,
         default: ''

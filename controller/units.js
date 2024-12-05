@@ -22,8 +22,57 @@ class Unit {
             })
 
             await newUnit.save()
-            res.status(201).json({error: false, message: "Unit successfully created"})
 
+            res.status(201).json(newUnit)
+            // res.status(201).json({error: false, message: "Unit successfully created"})
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async addPtsForModel(req, res) {
+        try {
+
+            await Units.findOneAndUpdate(
+                {_id: req.params.id},
+                {$set: {ptsForModel: req.body}}
+            )
+
+            res.status(201).json({error: false, message: "Add models"})
+
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async updatePtsAndModel(req, res) {
+        try {
+
+            if (req.body.checked) {
+                const model = await Units.findOne({_id: req.params.id, 'ptsForModel.position': req.body.position})
+
+                if (model) {
+
+                    await Units.updateOne({
+                        _id: req.params.id,
+                        'ptsForModel.position': req.body.position
+                    }, {$set: {'ptsForModel.$.pts': req.body.pts, 'ptsForModel.$.model': req.body.model}})
+
+                } else {
+                    await Units.findOneAndUpdate({_id: req.params.id}, {$push: {'ptsForModel': req.body}})
+                }
+
+
+            } else {
+                await Units.findOneAndUpdate({_id: req.params.id}, {$pull: {'ptsForModel': {'model': req.body.model}}})
+            }
+
+
+            res.status(201).json({error: false, message: "Models update"})
         } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
