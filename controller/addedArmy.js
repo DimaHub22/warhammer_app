@@ -33,6 +33,17 @@ class AddArmy  {
             res.status(400).json({error: true, message: "Error service"})
         }
     }
+    async getArmyOfCodex(req,res){
+        try {
+
+            const units = await AddedArmy.find({race:req.params.race, codexId:req.params.codexId})
+            res.status(200).json(units)
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
 
     async getArmyId(req,res){
         try {
