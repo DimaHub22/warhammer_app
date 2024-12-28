@@ -200,7 +200,46 @@ class Unit {
             res.json(units)
 
         } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
 
+    async searchSquadUnit(req,res){
+        try {
+            const {squad,race} = req.query
+
+            if (!squad) {
+                return res.status(400).json({error: true, message: "Not found"})
+            }
+
+            const units = await Units.find(
+                {'squad': {"$regex": squad}, 'race':{"$regex": race}}
+            )
+
+            res.json(units)
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+
+    }
+
+    async searchSquadUnitTransport(req, res){
+        try {
+            const {race} = req.query
+
+            if (!race) {
+                return res.status(400).json({error: true, message: "Not found"})
+            }
+            const units = await Units.find(
+                {'canBeEmbarkedCount.checked':true, 'race':{"$regex": race}}
+            )
+            res.json(units)
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
         }
     }
 

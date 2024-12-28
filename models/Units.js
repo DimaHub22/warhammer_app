@@ -34,7 +34,16 @@ const Unit = new Schema({
     },
     race:String,
 
-    keywords:String
+    keywords:String,
+    squad:[String],
+    transportCount:{
+        type:Number,
+        default: 0
+    },
+
+    canBeEmbarkedCount:{ count:{ type:Number, default: 0}, checked:{type:Boolean,default: false}},
+    attach:[String]
+
 
 })
 
