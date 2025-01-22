@@ -75,10 +75,10 @@ class Squads {
     async attachUnit(req, res) {
         try {
 
-                await Units.findOneAndUpdate(
-                    {_id: req.params.id},
-                    {$set: req.body}
-                )
+            await Units.findOneAndUpdate(
+                {_id: req.params.id},
+                {$set: req.body}
+            )
 
             res.status(200).json({error: false, message: "Added unit"})
         } catch (e) {
@@ -87,6 +87,91 @@ class Squads {
         }
     }
 
+    async updateLeaderForUnit(req, res) {
+        try {
+
+            const {add, leader} = req.body
+
+            const unit = await Units.findOne({_id: req.params.id})
+
+
+            if (add) {
+                if (!unit.leader.includes(leader)) {
+                    await Units.updateOne(
+                        {_id: req.params.id},
+                        {$push: {'leader': leader}}
+                    )
+                }
+            } else {
+                await Units.updateOne(
+                    {_id: req.params.id},
+                    {$pull: {'leader': leader}}
+                )
+            }
+
+            res.status(200).json({error: false, message: "Added leader"})
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async updateSecondLeaderForLeader(req, res) {
+        try {
+
+            const {add, leader} = req.body
+
+            const unit = await Units.findOne({_id: req.params.id})
+
+            if (add) {
+                if (!unit.leader.includes(leader)) {
+                    await Units.updateOne(
+                        {_id: req.params.id},
+                        {$push: {'moreLeader': leader}}
+                    )
+                }
+            } else {
+                await Units.updateOne(
+                    {_id: req.params.id},
+                    {$pull: {'moreLeader': leader}}
+                )
+            }
+
+            res.status(200).json({error: false, message: "Added leader"})
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async updateLeaderForSecondLeader(req, res) {
+        try {
+
+            const {add, leader} = req.body
+
+            const unit = await Units.findOne({_id: req.params.id})
+
+            if (add) {
+                if (!unit.leader.includes(leader)) {
+                    await Units.updateOne(
+                        {_id: req.params.id},
+                        {$push: {'moreSecond': leader}}
+                    )
+                }
+            } else {
+                await Units.updateOne(
+                    {_id: req.params.id},
+                    {$pull: {'moreSecond': leader}}
+                )
+            }
+
+            res.status(200).json({error: false, message: "Added leader"})
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
 }
 
 module.exports = new Squads()

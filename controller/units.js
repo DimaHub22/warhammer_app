@@ -32,6 +32,50 @@ class Unit {
         }
     }
 
+    async screenOne(req,res){
+        try {
+            const unit =await Units.findOne({_id:req.params.id})
+
+            if(unit){
+                await Units.findOneAndUpdate(
+                    {_id:req.params.id},
+                    {$set:{'screenshotOne':req.file ? req.file.path : ''}}
+                )
+
+            }
+            res.status(201).json({error:false, message:"Add screen"})
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+    async screenSecond(req,res){
+        try {
+            const unit =await Units.findOne({_id:req.params.id})
+
+            if(unit){
+                await Units.findOneAndUpdate(
+                    {_id:req.params.id},
+                    {$set:{'screenshotSecond':req.file ? req.file.path : ''}}
+                )
+
+            }
+            res.status(201).json({error:false, message:"Add screen"})
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+    async getUnitId(req,res){
+        try {
+            const unit  = await Units.findOne({_id:req.params.id})
+            res.status(200).json(unit)
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
     async addPtsForModel(req, res) {
         try {
 
@@ -83,6 +127,19 @@ class Unit {
         try {
 
             const units = await Units.find()
+            res.status(200).json(units)
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async getUnitsArr(req, res) {
+        try {
+
+            const arr = req.query.arr
+            const units = await Units.find({ _id: { $in: req.query.arr } })
             res.status(200).json(units)
 
         } catch (e) {

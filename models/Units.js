@@ -16,6 +16,14 @@ const Unit = new Schema({
         type: String,
         default: ''
     },
+    screenshotOne: {
+        type: String,
+        default: ''
+    },
+    screenshotSecond: {
+        type: String,
+        default: ''
+    },
     power:{
         type:Boolean,
         default:false
@@ -42,7 +50,10 @@ const Unit = new Schema({
     },
 
     canBeEmbarkedCount:{ count:{ type:Number, default: 0}, checked:{type:Boolean,default: false}},
-    attach:[String]
+    attach:[String],
+    leader:[String],
+    moreLeader:[String],
+    moreSecond:[String]
 
 
 })
