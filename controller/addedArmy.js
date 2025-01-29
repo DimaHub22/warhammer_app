@@ -25,8 +25,10 @@ class AddArmy {
                 position,
                 squad,
                 screenshotOne,
-                screenshotSecond
-
+                screenshotSecond,
+                count,
+                transportCount,
+                canBeEmbarkedCount
             } = req.body
 
             const unit = await new AddedArmy({
@@ -46,7 +48,10 @@ class AddArmy {
                 position,
                 squad,
                 screenshotOne,
-                screenshotSecond
+                screenshotSecond,
+                count,
+                transportCount,
+                canBeEmbarkedCount
             })
 
 
@@ -103,6 +108,19 @@ class AddArmy {
 
             res.status(201).json({error: false, message: "Unit deleted"})
         } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+
+    async deleteManyUnits(req,res){
+        try {
+            await AddedArmy.deleteMany({_id: {$in: req.body.units}})
+
+            res.status(201).json({error: false, message: "Unit deleted"})
+
+        }catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
@@ -178,6 +196,157 @@ class AddArmy {
             res.status(400).json({error: true, message: "Error service"})
         }
     }
+
+    async addAttachUnitForTransport(req, res) {
+        try {
+            const {unit, updateArr, embark} = req.body
+
+            const unitAttach = await AddedArmy.findOne({_id: unit})
+
+
+            if (!updateArr) {
+                if (Array.isArray(unit)) {
+                    const transports = await AddedArmy.findOne({_id:req.params.id})
+
+                    if(transports && transports.attachUnitsForTransport.length !== 0){
+
+                        const transport = await AddedArmy.findOneAndUpdate(
+                            {_id: req.params.id},
+                            {$set:{'attachUnitsForTransport': [...unit, ...transports.attachUnitsForTransport]},'embark': embark}
+                        )
+
+                    }else{
+                        const transport = await AddedArmy.findOneAndUpdate(
+                            {_id: req.params.id},
+                            {$set:{'attachUnitsForTransport': unit},'embark': embark}
+                        )
+                    }
+
+                    // const transport = await AddedArmy.findOneAndUpdate(
+                    //     {_id: req.params.id},
+                    //     {$set:{'attachUnitsForTransport': unit},'embark': embark}
+                    // )
+
+                } else {
+                    const transport = await AddedArmy.findOneAndUpdate(
+                        {_id: req.params.id},
+                        {$push:{'attachUnitsForTransport': unit},'embark': embark}
+                    )
+
+                }
+
+            }else{
+                if (Array.isArray(unit)) {
+
+                    const transport = await AddedArmy.findOneAndUpdate(
+                        {_id: req.params.id},
+                        {$pullAll:{'attachUnitsForTransport': unit}}
+                    )
+
+                    const transports = await AddedArmy.findOne({_id:req.params.id})
+
+                    if(transports && transports.attachUnitsForTransport.length === 0){
+                        await AddedArmy.findOneAndUpdate(
+                            {_id: req.params.id},
+                            {$set:{'categoryId': transports.originCategory}, 'embark': false,'join':false}
+                        )
+                    }
+
+                    if(transports && transports.attachUnitsForTransport.length !== 0){
+
+                        // const transport = await AddedArmy.findOneAndUpdate(
+                        //     {_id: req.params.id},
+                        //     {$set:{'attachUnitsForTransport': [...unit, ...transports.attachUnitsForTransport]},'embark': embark}
+                        // )
+
+                    }else{
+                        // const transport = await AddedArmy.findOneAndUpdate(
+                        //     {_id: req.params.id},
+                        //     {$set:{'attachUnitsForTransport': unit},'embark': embark}
+                        // )
+                    }
+
+                    // const transport = await AddedArmy.findOneAndUpdate(
+                    //     {_id: req.params.id},
+                    //     {$set:{'attachUnitsForTransport': unit},'embark': embark}
+                    // )
+
+                } else {
+
+                    const transport = await AddedArmy.findOneAndUpdate(
+                        {_id: req.params.id},
+                        {$pull:{'attachUnitsForTransport': unit}}
+                    )
+
+                    const transports = await AddedArmy.findOne({_id:req.params.id})
+
+                    if(transports && transports.attachUnitsForTransport.length === 0){
+                        await AddedArmy.findOneAndUpdate(
+                            {_id: req.params.id},
+                            {$set:{'categoryId': transports.originCategory}, 'embark': false,'join':false}
+                        )
+                    }
+
+                }
+            }
+            //
+            //     const leader = await AddedArmy.findOneAndUpdate(
+            //         {_id: req.params.id},
+            //         {$push: {'attachUnitsForTransport': unit}, 'embark': embark}
+            //     )
+            // } else {
+            //     const leader = await AddedArmy.findOneAndUpdate(
+            //         {_id: req.params.id},
+            //         {$pull: {'attachUnitsForTransport': unit}, 'embark': embark}
+            //     )
+            //
+            //     const leaderAttach = await AddedArmy.findOne({_id: req.params.id})
+            //     if(leaderAttach && leaderAttach.attachUnits.length !== 0){
+            //         // console.log(leaderAttach)
+            //     }else{
+            //
+            //         const leader = await AddedArmy.findOneAndUpdate(
+            //             {_id: req.params.id},
+            //             {'embark': false}
+            //         )
+            //     }
+            // }
+
+            res.status(200).json({error: false, message: "Added"})
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+async updateUnitsFromTransport(req,res){
+        try {
+            const {units} = req.body
+
+            const unitsUpdate = await AddedArmy.find({_id:{$in: units}})
+
+            if(unitsUpdate){
+                unitsUpdate.forEach(async item => {
+
+                    const updatedUnit = await AddedArmy.findOneAndUpdate(
+                        {_id: item._id},
+                        {$set: {"categoryId":item.originCategory}}
+                    )
+
+                })
+
+                res.status(200).json({error: false, message: "Added"})
+
+            }
+
+
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+}
 
     async updateAddedUnitForArmy(req, res) {
         try {

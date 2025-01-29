@@ -181,24 +181,24 @@ class Unit {
                 {$set: update}
             )
 
-            const addedArmy = await AddedArmy.find({unitId: req.params.id})
-
-            if (addedArmy) {
-                let unit = {
-                    name: req.body.name,
-                    pts: req.body.pts,
-                }
-
-                if (req.file) {
-                    unit.image = req.file.path
-                }
-
-
-                await AddedArmy.updateMany(
-                    {unitId: req.params.id},
-                    {$set: unit}
-                )
-            }
+            // const addedArmy = await AddedArmy.find({unitId: req.params.id})
+            //
+            // if (addedArmy) {
+            //     let unit = {
+            //         name: req.body.name,
+            //         pts: req.body.pts,
+            //     }
+            //
+            //     if (req.file) {
+            //         unit.image = req.file.path
+            //     }
+            //
+            //
+            //     await AddedArmy.updateMany(
+            //         {unitId: req.params.id},
+            //         {$set: unit}
+            //     )
+            // }
             res.status(200).json({error: false, message: "Update"})
 
         } catch (e) {

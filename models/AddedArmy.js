@@ -37,7 +37,15 @@ const AddedArmy = new Schema({
     position:Number,
     squad:[String],
     screenshotOne:String,
-    screenshotSecond:String
+    screenshotSecond:String,
+    count:Number,
+    transportCount:Number,
+    canBeEmbarkedCount:{ count:{ type:Number, default: 0}, checked:{type:Boolean,default: false}},
+    embark:{
+        type:Boolean,
+        defauil:false
+    },
+    attachUnitsForTransport:[String],
 
 })
 
