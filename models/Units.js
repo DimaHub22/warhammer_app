@@ -53,7 +53,8 @@ const Unit = new Schema({
     attach:[String],
     leader:[String],
     moreLeader:[String],
-    moreSecond:[String]
+    moreSecond:[String],
+    attachTransport:[String]
 
 
 })

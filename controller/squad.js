@@ -172,6 +172,55 @@ class Squads {
             res.status(400).json({error: true, message: "Error service"})
         }
     }
+
+    async updateUnitForTransport(req, res) {
+        try {
+
+            const {add, leader} = req.body
+
+            const unit = await Units.findOne({_id: req.params.id})
+
+            if (add) {
+                if (!unit.leader.includes(leader)) {
+                    await Units.updateOne(
+                        {_id: req.params.id},
+                        {$push: {'attachTransport': leader}}
+                    )
+                }
+            } else {
+                await Units.updateOne(
+                    {_id: req.params.id},
+                    {$pull: {'attachTransport': leader}}
+                )
+            }
+
+            res.status(200).json({error: false, message: "Added leader"})
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async updateTransportNewUnit(req,res){
+        try {
+
+            const unit = await Units.findOne({_id: req.params.id})
+
+            if(!unit){
+              return   res.status(400).json({error: true, message: "Error service"})
+            }
+
+            await Units.findOneAndUpdate(
+                {_id: req.params.id},
+                {$set: {'attachTransport' : req.body.attachTransport}}
+            )
+
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
 }
 
 module.exports = new Squads()
