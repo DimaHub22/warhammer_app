@@ -51,6 +51,7 @@ const Unit = new Schema({
 
     canBeEmbarkedCount:{ count:{ type:Number, default: 0}, checked:{type:Boolean, default: false}},
     attach:[String],
+    attachUnitTransport:[String],
     leader:[String],
     moreLeader:[String],
     moreSecond:[String],
