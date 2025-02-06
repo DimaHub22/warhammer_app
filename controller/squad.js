@@ -117,7 +117,7 @@ class Squads {
                         {$push: {'leader': leader}}
                     )
                 }
-            } else {
+            } else{
                 await Units.updateOne(
                     {_id: req.params.id},
                     {$pull: {'leader': leader}}
