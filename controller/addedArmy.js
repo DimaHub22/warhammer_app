@@ -28,7 +28,9 @@ class AddArmy {
                 screenshotSecond,
                 count,
                 transportCount,
-                canBeEmbarkedCount
+                canBeEmbarkedCount,
+                attachUnitTransport,
+                attachTransport
             } = req.body
 
             const unit = await new AddedArmy({
@@ -51,7 +53,9 @@ class AddArmy {
                 screenshotSecond,
                 count,
                 transportCount,
-                canBeEmbarkedCount
+                canBeEmbarkedCount,
+                attachUnitTransport,
+                attachTransport
             })
 
 
@@ -397,6 +401,35 @@ async updateUnitsFromTransport(req,res){
             }
 
             res.status(200).json({error: false, message: "Update"})
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async updateCoutn(req,res){
+        try {
+            const {count} = req.body
+
+            await AddedArmy.findOneAndUpdate({_id: req.params.id},{$set:{'count': count}})
+
+            res.status(200).json({error: false, message: "Update"})
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async disembarkTransport(req,res){
+        try {
+
+            await AddedArmy.findOneAndUpdate(
+                {_id: req.params.id},
+                {$set:req.body})
+
+            res.status(200).json({error: false, message: "Disembark"})
 
         }catch (e) {
             console.log(e)

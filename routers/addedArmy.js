@@ -15,6 +15,9 @@ router.patch('/attach-unit/:id', AddedArmy.addAttachUnitForLeader)
 router.patch('/attach-transport/:id', AddedArmy.addAttachUnitForTransport)
 router.patch('/change/:id', AddedArmy.changeUnit)
 
+router.patch('/count/:id', AddedArmy.updateCoutn)
+router.patch('/disembark-transport/:id', AddedArmy.disembarkTransport)
+
 
 
 
