@@ -8,7 +8,7 @@ const AddedArmy = require("../controller/addedArmy");
 
 router.post('/create', upload.single('image'), Unit.createUnit)
 router.get('/', Unit.getUnits)
-router.get('/:race', Unit.getUnitsOfCodex)
+router.get('/units/:race', Unit.getUnitsOfCodex)
 router.get('/array', Unit.getUnitsArr)
 router.get('/search', Unit.searchUnit)
 router.get('/search-squad', Unit.searchSquadUnit)
