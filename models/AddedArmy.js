@@ -47,7 +47,8 @@ const AddedArmy = new Schema({
     },
     attachUnitsForTransport:[String],
     attachTransport:[String],
-    attachUnitTransport:[String]
+    attachUnitTransport:[String],
+    attach:[String]
 
 })
 

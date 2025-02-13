@@ -30,7 +30,8 @@ class AddArmy {
                 transportCount,
                 canBeEmbarkedCount,
                 attachUnitTransport,
-                attachTransport
+                attachTransport,
+                attach
             } = req.body
 
             const unit = await new AddedArmy({
@@ -55,7 +56,8 @@ class AddArmy {
                 transportCount,
                 canBeEmbarkedCount,
                 attachUnitTransport,
-                attachTransport
+                attachTransport,
+                attach
             })
 
 
