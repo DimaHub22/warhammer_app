@@ -135,6 +135,17 @@ class Unit {
         }
     }
 
+    async getUnitsOfCodex(req,res){
+        try {
+
+            const units = await Units.find({race: req.params.race})
+            res.status(200).json(units)
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
     async getUnitsArr(req, res) {
         try {
 

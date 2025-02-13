@@ -2,11 +2,13 @@ const Router = require('express')
 const router = new Router()
 const Unit = require('../controller/units')
 const upload = require('../middleware/upload')
+const AddedArmy = require("../controller/addedArmy");
 
 
 
 router.post('/create', upload.single('image'), Unit.createUnit)
 router.get('/', Unit.getUnits)
+router.get('/:race', Unit.getUnitsOfCodex)
 router.get('/array', Unit.getUnitsArr)
 router.get('/search', Unit.searchUnit)
 router.get('/search-squad', Unit.searchSquadUnit)
