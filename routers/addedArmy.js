@@ -18,9 +18,13 @@ router.patch('/change/:id', AddedArmy.changeUnit)
 router.patch('/count/:id', AddedArmy.updateCoutn)
 router.patch('/disembark-transport/:id', AddedArmy.disembarkTransport)
 
+
+
 router.patch('/detach-leader/:id', AddedArmy.detachLeader)
 router.patch('/detach-second/:id', AddedArmy.detachSecond)
 router.patch('/detach-units/:id', AddedArmy.detachUnits)
+
+router.patch('/attach-leader-squad/:id',AddedArmy.addAttachLeaderForSquad)
 
 
 

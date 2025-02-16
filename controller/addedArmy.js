@@ -452,7 +452,45 @@ class AddArmy {
         }
     }
 
-///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////ATTACH//////////////
+
+    async addAttachLeaderForSquad(req, res) {
+        try {
+            const {unitId} = req.body
+
+            const secondLeader = await AddedArmy.findOne({_id: req.params.id})
+
+            await AddedArmy.findOneAndUpdate({_id: unitId}, {
+                $set: {
+                    'attachLeader': '',
+                    'attachUnits': [...secondLeader.attachUnits, req.params.id]
+                }
+            })
+            await AddedArmy.findOneAndUpdate({_id: req.params.id}, {
+                $set: {
+                    'attachLeader': unitId,
+                    'attachUnits': []
+                }
+            })
+            await AddedArmy.findOneAndUpdate({_id: secondLeader.attachUnits[0]}, {
+                $set: {
+                    'attachLeader': unitId,
+                }
+            })
+
+
+            res.status(200).json({error: false, message: "Added"})
+
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    /////////////////////////////////////////
+
+////////////////////////////////////DETACH///////////////////////////////////////////////////////////
     async detachLeader(req, res) {
         try {
 
@@ -532,15 +570,15 @@ class AddArmy {
 
             if (units.length !== 0) {
 
-                if(units.length === 1){
+                if (units.length === 1) {
 
                     const unitId = units[0]
                     const unit = await AddedArmy.findOne({_id: unitId})
 
-                    if(unit){
+                    if (unit) {
                         await AddedArmy.updateMany(
                             {_id: unitId},
-                            {$set:{"categoryId": unit.originCategory,'join':false, 'attachLeader': ''}}
+                            {$set: {"categoryId": unit.originCategory, 'join': false, 'attachLeader': ''}}
                         )
 
                         await AddedArmy.findOneAndUpdate(
@@ -551,16 +589,14 @@ class AddArmy {
                     }
 
 
-
-
-                }else{
+                } else {
 
                     const unitId1 = units[0]
                     const unit1 = await AddedArmy.findOne({_id: unitId1})
 
                     await AddedArmy.updateMany(
                         {_id: unitId1},
-                        {$set:{"categoryId": unit1.originCategory},'join':false, 'attachLeader': ''}
+                        {$set: {"categoryId": unit1.originCategory}, 'join': false, 'attachLeader': ''}
                     )
 
                     const unitId2 = units[1]
@@ -568,7 +604,7 @@ class AddArmy {
 
                     await AddedArmy.updateMany(
                         {_id: unitId2},
-                        {$set:{"categoryId": unit2.originCategory},'join':false, 'attachLeader': ''}
+                        {$set: {"categoryId": unit2.originCategory}, 'join': false, 'attachLeader': ''}
                     )
 
                     const {leaderId} = req.body
@@ -576,9 +612,9 @@ class AddArmy {
                     const leaderAttach = await AddedArmy.findOne({_id: leaderId})
 
                     if (leaderAttach && leaderAttach.attachUnits.length !== 0) {
-                      await AddedArmy.findOneAndUpdate(
+                        await AddedArmy.findOneAndUpdate(
                             {_id: leaderId},
-                            {'join': false , 'attachUnits': []}
+                            {'join': false, 'attachUnits': []}
                         )
                     }
                 }
