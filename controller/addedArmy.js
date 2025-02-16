@@ -533,18 +533,25 @@ class AddArmy {
             if (units.length !== 0) {
 
                 if(units.length === 1){
+
                     const unitId = units[0]
                     const unit = await AddedArmy.findOne({_id: unitId})
 
-                     await AddedArmy.updateMany(
-                         {_id: unitId},
-                         {$set:{"categoryId": unit.originCategory},'join':false, 'attachLeader': ''}
-                     )
+                    if(unit){
+                        await AddedArmy.updateMany(
+                            {_id: unitId},
+                            {$set:{"categoryId": unit.originCategory,'join':false, 'attachLeader': ''}}
+                        )
 
-                    await AddedArmy.findOneAndUpdate(
-                         {_id: req.params.id},
-                         {$set: {'attachUnits': []}, 'join': false}
-                     )
+                        await AddedArmy.findOneAndUpdate(
+                            {_id: unit.attachLeader},
+                            {$set: {'attachUnits': [], 'join': false}}
+                        )
+
+                    }
+
+
+
 
                 }else{
 
@@ -575,8 +582,6 @@ class AddArmy {
                         )
                     }
                 }
-
-
 
             }
 
