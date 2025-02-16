@@ -120,13 +120,13 @@ class AddArmy {
     }
 
 
-    async deleteManyUnits(req,res){
+    async deleteManyUnits(req, res) {
         try {
             await AddedArmy.deleteMany({_id: {$in: req.body.units}})
 
             res.status(201).json({error: false, message: "Unit deleted"})
 
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
@@ -184,9 +184,10 @@ class AddArmy {
                 )
 
                 const leaderAttach = await AddedArmy.findOne({_id: req.params.id})
-                if(leaderAttach && leaderAttach.attachUnits.length !== 0){
+
+                if (leaderAttach && leaderAttach.attachUnits.length !== 0) {
                     // console.log(leaderAttach)
-                }else{
+                } else {
 
                     const leader = await AddedArmy.findOneAndUpdate(
                         {_id: req.params.id},
@@ -212,19 +213,22 @@ class AddArmy {
 
             if (!updateArr) {
                 if (Array.isArray(unit)) {
-                    const transports = await AddedArmy.findOne({_id:req.params.id})
+                    const transports = await AddedArmy.findOne({_id: req.params.id})
 
-                    if(transports && transports.attachUnitsForTransport.length !== 0){
+                    if (transports && transports.attachUnitsForTransport.length !== 0) {
 
                         const transport = await AddedArmy.findOneAndUpdate(
                             {_id: req.params.id},
-                            {$set:{'attachUnitsForTransport': [...unit, ...transports.attachUnitsForTransport]},'embark': embark}
+                            {
+                                $set: {'attachUnitsForTransport': [...unit, ...transports.attachUnitsForTransport]},
+                                'embark': embark
+                            }
                         )
 
-                    }else{
+                    } else {
                         const transport = await AddedArmy.findOneAndUpdate(
                             {_id: req.params.id},
-                            {$set:{'attachUnitsForTransport': unit},'embark': embark}
+                            {$set: {'attachUnitsForTransport': unit}, 'embark': embark}
                         )
                     }
 
@@ -236,36 +240,36 @@ class AddArmy {
                 } else {
                     const transport = await AddedArmy.findOneAndUpdate(
                         {_id: req.params.id},
-                        {$push:{'attachUnitsForTransport': unit},'embark': embark}
+                        {$push: {'attachUnitsForTransport': unit}, 'embark': embark}
                     )
 
                 }
 
-            }else{
+            } else {
                 if (Array.isArray(unit)) {
 
                     const transport = await AddedArmy.findOneAndUpdate(
                         {_id: req.params.id},
-                        {$pullAll:{'attachUnitsForTransport': unit}}
+                        {$pullAll: {'attachUnitsForTransport': unit}}
                     )
 
-                    const transports = await AddedArmy.findOne({_id:req.params.id})
+                    const transports = await AddedArmy.findOne({_id: req.params.id})
 
-                    if(transports && transports.attachUnitsForTransport.length === 0){
+                    if (transports && transports.attachUnitsForTransport.length === 0) {
                         await AddedArmy.findOneAndUpdate(
                             {_id: req.params.id},
-                            {$set:{'categoryId': transports.originCategory}, 'embark': false,'join':false}
+                            {$set: {'categoryId': transports.originCategory}, 'embark': false, 'join': false}
                         )
                     }
 
-                    if(transports && transports.attachUnitsForTransport.length !== 0){
+                    if (transports && transports.attachUnitsForTransport.length !== 0) {
 
                         // const transport = await AddedArmy.findOneAndUpdate(
                         //     {_id: req.params.id},
                         //     {$set:{'attachUnitsForTransport': [...unit, ...transports.attachUnitsForTransport]},'embark': embark}
                         // )
 
-                    }else{
+                    } else {
                         // const transport = await AddedArmy.findOneAndUpdate(
                         //     {_id: req.params.id},
                         //     {$set:{'attachUnitsForTransport': unit},'embark': embark}
@@ -281,15 +285,15 @@ class AddArmy {
 
                     const transport = await AddedArmy.findOneAndUpdate(
                         {_id: req.params.id},
-                        {$pull:{'attachUnitsForTransport': unit}}
+                        {$pull: {'attachUnitsForTransport': unit}}
                     )
 
-                    const transports = await AddedArmy.findOne({_id:req.params.id})
+                    const transports = await AddedArmy.findOne({_id: req.params.id})
 
-                    if(transports && transports.attachUnitsForTransport.length === 0){
+                    if (transports && transports.attachUnitsForTransport.length === 0) {
                         await AddedArmy.findOneAndUpdate(
                             {_id: req.params.id},
-                            {$set:{'categoryId': transports.originCategory}, 'embark': false,'join':false}
+                            {$set: {'categoryId': transports.originCategory}, 'embark': false, 'join': false}
                         )
                     }
 
@@ -326,18 +330,18 @@ class AddArmy {
         }
     }
 
-async updateUnitsFromTransport(req,res){
+    async updateUnitsFromTransport(req, res) {
         try {
             const {units} = req.body
 
-            const unitsUpdate = await AddedArmy.find({_id:{$in: units}})
+            const unitsUpdate = await AddedArmy.find({_id: {$in: units}})
 
-            if(unitsUpdate){
+            if (unitsUpdate) {
                 unitsUpdate.forEach(async item => {
 
                     const updatedUnit = await AddedArmy.findOneAndUpdate(
                         {_id: item._id},
-                        {$set: {"categoryId":item.originCategory}}
+                        {$set: {"categoryId": item.originCategory}}
                     )
 
                 })
@@ -347,12 +351,11 @@ async updateUnitsFromTransport(req,res){
             }
 
 
-
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
-}
+    }
 
     async updateAddedUnitForArmy(req, res) {
         try {
@@ -379,7 +382,7 @@ async updateUnitsFromTransport(req,res){
 
     }
 
-    async changeUnit(req,res){
+    async changeUnit(req, res) {
         try {
 
             const secondLeader = await AddedArmy.findOne({_id: req.params.id})
@@ -388,58 +391,206 @@ async updateUnitsFromTransport(req,res){
 
             const newArr = secondLeader.attachUnits.filter(item => item !== req.body.idLeader)
 
-            await AddedArmy.findOneAndUpdate({_id: req.body.idLeader}, {$set:{'attachLeader': '', 'attachUnits':[...newArr, req.params.id]}})
-            await AddedArmy.findOneAndUpdate({_id: req.params.id}, {$set:{'attachLeader': req.body.idLeader, 'attachUnits':[]}})
+            await AddedArmy.findOneAndUpdate({_id: req.body.idLeader}, {
+                $set: {
+                    'attachLeader': '',
+                    'attachUnits': [...newArr, req.params.id]
+                }
+            })
+            await AddedArmy.findOneAndUpdate({_id: req.params.id}, {
+                $set: {
+                    'attachLeader': req.body.idLeader,
+                    'attachUnits': []
+                }
+            })
 
 
-            if(secondLeader){
+            if (secondLeader) {
                 const attachUnit = secondLeader.attachUnits.find(item => item !== req.body.idLeader)
-                if(attachUnit){
+                if (attachUnit) {
                     // const unit = await AddedArmy.findOne({_id: attachUnit})
 
-                    await AddedArmy.findOneAndUpdate({_id: attachUnit},{$set:{'attachLeader': req.body.idLeader}})
+                    await AddedArmy.findOneAndUpdate({_id: attachUnit}, {$set: {'attachLeader': req.body.idLeader}})
 
                 }
             }
 
             res.status(200).json({error: false, message: "Update"})
 
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
     }
 
-    async updateCoutn(req,res){
+    async updateCoutn(req, res) {
         try {
             const {count} = req.body
 
-            await AddedArmy.findOneAndUpdate({_id: req.params.id},{$set:{'count': count}})
+            await AddedArmy.findOneAndUpdate({_id: req.params.id}, {$set: {'count': count}})
 
             res.status(200).json({error: false, message: "Update"})
 
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
     }
 
-    async disembarkTransport(req,res){
+    async disembarkTransport(req, res) {
         try {
 
             await AddedArmy.findOneAndUpdate(
                 {_id: req.params.id},
-                {$set:req.body})
+                {$set: req.body})
 
             res.status(200).json({error: false, message: "Disembark"})
 
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
     }
 
+///////////////////////////////////////////////////////////////////////////////////////////////
+    async detachLeader(req, res) {
+        try {
 
+            const secondLeader = await AddedArmy.findOne({_id: req.params.id})
+            const leader = await AddedArmy.findOne({_id: req.body.idLeader})
+
+
+            const newArr = secondLeader.attachUnits.filter(item => item !== req.body.idLeader)
+
+            await AddedArmy.findOneAndUpdate({_id: req.body.idLeader}, {
+                $set: {
+                    'attachLeader': '',
+                    'attachUnits': [...newArr]
+                }
+            })
+
+            await AddedArmy.findOneAndUpdate(
+                {_id: req.params.id},
+                {
+                    $set: {
+                        'attachLeader': '',
+                        'attachUnits': [],
+                        "categoryId": secondLeader.originCategory,
+                        "join": false
+                    }
+                })
+
+            if (secondLeader) {
+                const attachUnit = secondLeader.attachUnits.find(item => item !== req.body.idLeader)
+                if (attachUnit) {
+
+                    await AddedArmy.findOneAndUpdate({_id: attachUnit}, {$set: {'attachLeader': req.body.idLeader}})
+                }
+            }
+
+            res.status(200).json({error: false, message: "Update"})
+
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async detachSecond(req, res) {
+        try {
+            const unit = await AddedArmy.findOne({_id: req.params.id})
+
+            const updatedUnit = await AddedArmy.findOneAndUpdate(
+                {_id: req.params.id},
+                {
+                    $set: {
+                        'join': false,
+                        'attachLeader': '',
+                    }
+                }
+            )
+
+            const leader = await AddedArmy.findOneAndUpdate(
+                {_id: unit.attachLeader},
+                {$pull: {'attachUnits': unit._id}}
+            )
+
+            res.status(200).json({error: false, message: "Update"})
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async detachUnits(req, res) {
+        try {
+
+            const leader = await AddedArmy.findOne({_id: req.params.id})
+            const {units} = req.body
+
+            if (units.length !== 0) {
+
+                if(units.length === 1){
+                    const unitId = units[0]
+                    const unit = await AddedArmy.findOne({_id: unitId})
+
+                     await AddedArmy.updateMany(
+                         {_id: unitId},
+                         {$set:{"categoryId": unit.originCategory},'join':false, 'attachLeader': ''}
+                     )
+
+                    await AddedArmy.findOneAndUpdate(
+                         {_id: req.params.id},
+                         {$set: {'attachUnits': []}, 'join': false}
+                     )
+
+                }else{
+
+                    const unitId1 = units[0]
+                    const unit1 = await AddedArmy.findOne({_id: unitId1})
+
+                    await AddedArmy.updateMany(
+                        {_id: unitId1},
+                        {$set:{"categoryId": unit1.originCategory},'join':false, 'attachLeader': ''}
+                    )
+
+                    const unitId2 = units[1]
+                    const unit2 = await AddedArmy.findOne({_id: unitId2})
+
+                    await AddedArmy.updateMany(
+                        {_id: unitId2},
+                        {$set:{"categoryId": unit2.originCategory},'join':false, 'attachLeader': ''}
+                    )
+
+                    const {leaderId} = req.body
+
+                    const leaderAttach = await AddedArmy.findOne({_id: leaderId})
+
+                    if (leaderAttach && leaderAttach.attachUnits.length !== 0) {
+                      await AddedArmy.findOneAndUpdate(
+                            {_id: leaderId},
+                            {'join': false , 'attachUnits': []}
+                        )
+                    }
+                }
+
+
+
+            }
+
+
+            res.status(200).json({error: false, message: "Update"})
+
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+//////////////////////////////////////////////////////////////////////////////////////////////
 }
 
 module.exports = new AddArmy()
