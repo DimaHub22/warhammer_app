@@ -294,6 +294,25 @@ class Unit {
 
     }
 
+    async getUnitsRorRace(req,res){
+        try {
+            const {race} = req.query
+
+            if (!race) {
+                return res.status(400).json({error: true, message: "Not found"})
+            }
+
+            const units = await Units.find(
+                {'race':{"$regex": race}}
+            )
+
+            res.json(units)
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
     async searchSquadUnitTransport(req, res){
         try {
             const {race} = req.query
