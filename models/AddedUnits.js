@@ -8,6 +8,10 @@ const AddedUnits = new Schema({
         type:String,
         default: ''
     },
+    favorite:{
+        type:Boolean,
+        default:false
+    }
 })
 
 module.exports = model('AddedUnits', AddedUnits)

@@ -6,8 +6,10 @@ const AddedUnits = require('../controller/addedUnits')
 router.get('/', AddedUnits.getAddedUnits)
 router.get('/:id', AddedUnits.getAddedUnitById)
 router.post('/add', AddedUnits.addUnit)
+router.post('/duplicate-race', AddedUnits.duplicateRace)
 router.delete('/:id', AddedUnits.deleteAddedUnit)
-router.patch('/:id', AddedUnits.updateLongList)
+router.patch('/list/:id', AddedUnits.updateLongList)
+router.patch('/favorite-race/:id', AddedUnits.favoriteRace)
 
 
 
