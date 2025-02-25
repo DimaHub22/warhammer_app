@@ -440,6 +440,20 @@ class AddArmy {
     async disembarkTransport(req, res) {
         try {
 
+            const {unitsNotJoin} = req.body
+
+            if(unitsNotJoin.length !== 0){
+
+                const units = await AddedArmy.find({ _id: { $in: unitsNotJoin } })
+                units.map(async item => {
+                    await AddedArmy.findOneAndUpdate(
+                        {_id:item._id},
+                        {$set:{'categoryId': item.originCategory}}
+                    )
+
+                })
+            }
+
             await AddedArmy.findOneAndUpdate(
                 {_id: req.params.id},
                 {$set: req.body})
