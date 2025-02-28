@@ -6,10 +6,10 @@ class AddUnit {
     async addUnit(req, res) {
         try {
 
-            const {idCodex, name, image} = req.body
+            const {idCodex, name, image,dateChange} = req.body
 
             const newUnit = await new AddedUnits({
-                idCodex, name, image
+                idCodex, name, image, dateChange
             })
             await newUnit.save()
 
@@ -23,10 +23,10 @@ class AddUnit {
 
     async duplicateRace(req, res) {
         try {
-            const {idCodex, name, image, listName, favorite, _id} = req.body.codex
+            const {idCodex, name, image, listName, favorite, _id, dateChange} = req.body.codex
 
             const codexNew = await new AddedUnits({
-                idCodex, name, image, listName, favorite
+                idCodex, name, image, listName, favorite,dateChange
             })
             await codexNew.save()
 
@@ -135,6 +135,22 @@ class AddUnit {
             const codex = await AddedUnits.findOneAndUpdate({_id: req.params.id},{$set:{'favorite':favorite}})
 
             res.status(200).json({error: false, message: "Favorite race"})
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async addDateForCodex(req,res){
+        try {
+
+            await AddedUnits.findOneAndUpdate(
+                {_id:req.params.id},
+                {$set:{'dateChange': req.body.dateChange}}
+            )
+
+            res.status(200).json({error: false, message: "Added date"})
+
         }catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})

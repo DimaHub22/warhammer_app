@@ -11,7 +11,8 @@ const AddedUnits = new Schema({
     favorite:{
         type:Boolean,
         default:false
-    }
+    },
+    dateChange:String
 })
 
 module.exports = model('AddedUnits', AddedUnits)
