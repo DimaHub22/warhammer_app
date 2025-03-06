@@ -8,7 +8,7 @@ const AddedArmy = new Schema({
     categoryId: {
         ref: 'Category',
         type: Schema.Types.ObjectId,
-        required: true
+
     },
     name: String,
     pts: Number,

@@ -71,6 +71,186 @@ class AddArmy {
         }
     }
 
+    async duplicateUnit(req, res) {
+        try {
+            const {
+                attach,
+                attachTransport,
+                attachUnitTransport,
+                attachUnits,
+                attachUnitsForTransport,
+                canBeEmbarkedCount,
+                categoryId,
+                codexId,
+                count,
+                description,
+                image,
+                join,
+                model,
+                name,
+                originCategory,
+                position,
+                power,
+                pts,
+                race,
+                screenshotOne,
+                screenshotSecond,
+                squad,
+                transportCount,
+                unitId
+            } = req.body
+            const unit = await new AddedArmy({
+                attach,
+                attachTransport,
+                attachUnitTransport,
+                attachUnits,
+                attachUnitsForTransport,
+                canBeEmbarkedCount,
+                categoryId,
+                codexId,
+                count,
+                description,
+                image,
+                join,
+                model,
+                name,
+                originCategory,
+                position,
+                power,
+                pts,
+                race,
+                screenshotOne,
+                screenshotSecond,
+                squad,
+                transportCount,
+                unitId
+            })
+
+            await unit.save()
+            res.status(201).json(unit)
+
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async duplicateArmySquad(req, res) {
+        try {
+
+            const unit = await AddedArmy.findOne({_id: req.params.id})
+
+
+            let squad
+
+            if (unit.attachUnits.length !== 0) {
+                const leader = unit
+                const attach = await AddedArmy.find({_id: {$in: leader.attachUnits}})
+                 squad = [leader, ...attach]
+
+
+            }
+
+            if (unit.attachLeader) {
+                const leader = await AddedArmy.findOne({_id: unit.attachLeader})
+                const attach = await AddedArmy.find({_id: {$in: leader.attachUnits}})
+                 squad = [leader, ...attach]
+            }
+
+
+            // if(squad.length !== 0){
+                let newCodex2 = []
+                squad.forEach(item => {
+
+                    const newUnits = {
+                        _id: item._id,
+                        unitId: item.unitId,
+                        categoryId: item.categoryId,
+                        name: item.name,
+                        pts: item.pts,
+                        model: item.model,
+                        image: item.image,
+                        power: item.power,
+                        description: item.description,
+                        race: item.race,
+                        codexId: item.codexId,
+                        join: item.join,
+                        embark: item.embark,
+                        attachLeader: item.attachLeader,
+                        attachUnits: item.attachUnits,
+                        originCategory: item.originCategory,
+                        position: item.position,
+                        squad: item.squad,
+                        screenshotOne: item.screenshotOne,
+                        screenshotSecond: item.screenshotSecond,
+                        count: item.count,
+                        transportCount: item.transportCount,
+                        canBeEmbarkedCount: item.canBeEmbarkedCount,
+                        attachUnitTransport: item.attachUnitTransport,
+                        attachTransport: item.attachTransport,
+                        attachUnitsForTransport: item.attachUnitsForTransport,
+                        attach: item.attach,
+                        // lastId: item._id
+                    }
+                    newCodex2.push(newUnits)
+
+                })
+
+                const duplicatedArray = newCodex2.map(doc => ({
+                    ...doc,
+                    _id: new ObjectId(),
+                }));
+
+                const idMapping = {};
+                newCodex2.forEach((oldDoc, index) => {
+                    const newDoc = duplicatedArray[index];
+                    idMapping[oldDoc._id.toString()] = String(newDoc._id);
+                });
+
+                // Шаг 3: Обновляем ссылки в дубликате
+                duplicatedArray.forEach(newDoc => {
+                    // Обновляем attachLeader
+                    if (newDoc.attachLeader && idMapping[newDoc.attachLeader.toString()]) {
+                        newDoc.attachLeader = idMapping[newDoc.attachLeader.toString()];
+                    }
+
+                    // Обновляем attachUnits
+                    if (newDoc.attachUnits && newDoc.attachUnits.length > 0) {
+                        newDoc.attachUnits = newDoc.attachUnits.map(unitId => {
+                            return idMapping[unitId.toString()] || unitId;
+                        });
+
+                        [...new Set(newDoc.attachUnits)]
+                    }
+
+                });
+
+                const AddedArmys = [];
+                duplicatedArray.forEach(doc => {
+                    AddedArmys.push(doc); // Добавляем каждый документ в массив
+                });
+
+
+                AddedArmy.insertMany(AddedArmys)
+                // AddedArmys.forEach(async item => {
+                //     const unit = await new AddedArmy(item)
+                //
+                //     await unit.save()
+                // })
+
+                res.status(201).json({error: false, message: "Duplicate squad"})
+            // }
+
+
+
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
     async getArmy(req, res) {
         try {
 
@@ -442,13 +622,13 @@ class AddArmy {
 
             const {unitsNotJoin} = req.body
 
-            if(unitsNotJoin.length !== 0){
+            if (unitsNotJoin.length !== 0) {
 
-                const units = await AddedArmy.find({ _id: { $in: unitsNotJoin } })
+                const units = await AddedArmy.find({_id: {$in: unitsNotJoin}})
                 units.map(async item => {
                     await AddedArmy.findOneAndUpdate(
-                        {_id:item._id},
-                        {$set:{'categoryId': item.originCategory}}
+                        {_id: item._id},
+                        {$set: {'categoryId': item.originCategory}}
                     )
 
                 })
