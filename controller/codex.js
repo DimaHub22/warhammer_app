@@ -31,11 +31,22 @@ class Codexes {
         }
     }
 
+    async getIdCodex(req,res){
+        try {
+
+            const codex = await Codex.findOne({_id:req.params.id})
+            res.status(200).json(codex)
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
     async getCodexId(req,res){
         try {
-            console.log(req.params)
+
             const codex = await Codex.findOne({items:req.params.id})
-            console.log(codex)
+            res.status(200).json({error: false, message: "Codex"})
         }catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})

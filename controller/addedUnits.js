@@ -124,6 +124,8 @@ class AddUnit {
                 })
 
                 res.status(201).json({error: false, message: "Duplicate race"})
+            }else{
+                res.status(201).json({error: false, message: "Duplicate race"})
             }
 
 
