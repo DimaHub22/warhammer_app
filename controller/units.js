@@ -298,9 +298,9 @@ class Unit {
         try {
 
             const units = await Units.find(
-                {'race':req.params.id}
+                {'race':req.query.codex}
             )
-
+            console.log(units)
             res.json(units)
 
 
