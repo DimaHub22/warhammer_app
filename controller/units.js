@@ -163,6 +163,7 @@ class Unit {
         try {
 
             const units = await Units.find({categoryId: req.query.category, race: req.query.idCodex})
+            console.log(req.query)
             res.status(200).json(units)
 
         } catch (e) {
