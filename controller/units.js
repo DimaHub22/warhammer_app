@@ -257,14 +257,14 @@ class Unit {
 
     async searchUnit(req, res) {
         try {
-            const {query} = req.query
+            const {query, race} = req.query
 
             if (!query) {
                 return res.status(400).json({error: true, message: "Not found"})
             }
-
+            console.log(req.query)
             const units = await Units.find(
-                {'name': {"$regex": query}}
+                {'name': {"$regex": query}, 'race':{"$regex": race}}
             )
             res.json(units)
 

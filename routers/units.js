@@ -16,7 +16,7 @@ router.get('/units/units-codex/all-units', Unit.getUnitsCategory)
 router.get('/units-race/search', Unit.getUnitsRorRace)
 router.get('/search-squad/search/unit', Unit.searchSquadUnit)
 
-router.get('/search-transport', Unit.searchSquadUnitTransport)
+router.get('/search-transport/transport', Unit.searchSquadUnitTransport)
 
 
 

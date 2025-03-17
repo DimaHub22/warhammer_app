@@ -20,17 +20,30 @@ class Codexes {
         }
     }
 
+    async categoryChange(req, res) {
+        try {
+            const {title} = req.body
+
+            await Codex.findOneAndUpdate({_id: req.params.id},
+                {$set: {'title': title}})
+            res.status(200).json({error: false, message: "Category successfully update"})
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
     async createCodexForCategory(req, res) {
         try {
             const codex = await Codex.findOne({_id: req.params.id})
 
             const newCodex = {
-                name:req.body.name,
-                image:req.file ? req.file.path : ''
+                name: req.body.name,
+                image: req.file ? req.file.path : ''
             }
 
             await Codex.findOneAndUpdate({_id: req.params.id},
-                {$push:{'items':newCodex}})
+                {$push: {'items': newCodex}})
 
             res.status(201).json({error: false, message: "Codex successfully created"})
 
@@ -40,20 +53,22 @@ class Codexes {
         }
     }
 
-    async codexChange(req,res){
+    async codexChange(req, res) {
         try {
 
-            const codex = await Codex.findOne({_id:req.body.category,'items._id':req.params.id }, { "items.$": 1 })
+            const codex = await Codex.findOne({_id: req.body.category, 'items._id': req.params.id}, {"items.$": 1})
 
-            const codexUp = await Codex.findOneAndUpdate({_id:req.body.category,'items._id':req.params.id },
-                {$set:{'items.$.name':req.body.name,
+            const codexUp = await Codex.findOneAndUpdate({_id: req.body.category, 'items._id': req.params.id},
+                {
+                    $set: {
+                        'items.$.name': req.body.name,
                         'items.$.image': req.file ? req.file.path : codex.items[0].image
-                }
+                    }
                 })
 
             res.status(201).json({error: false, message: "Codex successfully created"})
 
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
@@ -92,39 +107,39 @@ class Codexes {
         }
     }
 
-    async getCodexIdFromItems(req,res){
+    async getCodexIdFromItems(req, res) {
         try {
 
-            const codex = await Codex.findOne({'items._id': req.params.id},{ "items.$": 1 })
+            const codex = await Codex.findOne({'items._id': req.params.id}, {"items.$": 1})
             res.status(200).json(codex)
 
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
     }
 
-   async updateContent(req,res){
+    async updateContent(req, res) {
         try {
 
             const content = {
                 content: req.body.content
             };
 
-            const codexUp = await Codex.findOneAndUpdate({'items._id':req.params.id },
-                {$push:{'items.$.rules':content}})
+            const codexUp = await Codex.findOneAndUpdate({'items._id': req.params.id},
+                {$push: {'items.$.rules': content}})
 
             res.status(201).json({error: false, message: "Codex successfully created"})
 
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
-   }
+    }
 
-   async editContent(req,res){
+    async editContent(req, res) {
         try {
-            const {itemId,contentId,content} = req.body;
+            const {itemId, contentId, content} = req.body;
 
             const result = await Codex.findOneAndUpdate(
                 {
@@ -139,8 +154,8 @@ class Codexes {
                 },
                 {
                     arrayFilters: [
-                        { 'item._id': itemId }, // Фильтр для элемента в массиве items
-                        { 'rule._id': contentId }, // Фильтр для элемента в массиве rules
+                        {'item._id': itemId}, // Фильтр для элемента в массиве items
+                        {'rule._id': contentId}, // Фильтр для элемента в массиве rules
                     ],
                     new: true, // Возвращает обновленный документ
                 }
@@ -150,16 +165,16 @@ class Codexes {
             res.status(200).json({error: false, message: "Codex successfully update"})
 
 
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
-   }
+    }
 
-   async deleteContent(req,res){
+    async deleteContent(req, res) {
         try {
 
-            const {itemId,contentId} = req.body;
+            const {itemId, contentId} = req.body;
 
             const result = await Codex.findOneAndUpdate(
                 {
@@ -168,7 +183,7 @@ class Codexes {
                 },
                 {
                     $pull: {
-                        'items.$.rules': { _id: contentId }, // Удаляем правило по ID
+                        'items.$.rules': {_id: contentId}, // Удаляем правило по ID
                     },
                 },
                 {
@@ -177,11 +192,41 @@ class Codexes {
 
             res.status(200).json({error: false, message: "Codex successfully delete"})
 
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
-   }
+    }
+
+    async deleteCodex(req, res) {
+        try {
+
+            const codex = await Codex.findOne({'items._id': req.params.id})
+
+            if (codex) {
+                await Codex.updateOne({_id: codex._id}, {$pull: {'items': {_id: req.params.id}}})
+            }
+
+            res.status(200).json({error: false, message: "Codex successfully delete"})
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async deleteCategory(req, res) {
+        try {
+
+            await Codex.deleteOne({_id: req.params.id})
+
+            res.status(200).json({error: false, message: "Category successfully delete"})
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
 }
 
 module.exports = new Codexes()
