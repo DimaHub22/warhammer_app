@@ -69,6 +69,18 @@ class Categories {
         }
     }
 
+    async deleteUnitCategory(req,res){
+        try {
+            await Category.deleteOne({_id:req.params.id})
+
+            res.status(200).json({error: false, message: "Delete unit category"})
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
 }
 
 module.exports = new Categories()
