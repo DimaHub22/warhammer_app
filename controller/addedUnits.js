@@ -123,11 +123,12 @@ class AddUnit {
                     await unit.save()
                 })
 
-                res.status(201).json({error: false, message: "Duplicate race"})
+                // res.status(201).json({error: false, message: "Duplicate race"})
+                res.status(201).json(codexNew)
             }else{
-                res.status(201).json({error: false, message: "Duplicate race"})
+                // res.status(201).json({error: false, message: "Duplicate race"})
+                res.status(201).json(codexNew)
             }
-
 
 
 
