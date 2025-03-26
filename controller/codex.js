@@ -137,6 +137,24 @@ class Codexes {
         }
     }
 
+    async updateDetachment(req,res){
+        try {
+            const content = {
+                title: req.body.title,
+                detachment: req.body.detachment
+            };
+            const codexUp = await Codex.findOneAndUpdate({'items._id': req.params.id},
+                {$push: {'items.$.detachments': content}})
+
+
+            res.status(201).json({error: false, message: "Codex successfully created"})
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
     async editContent(req, res) {
         try {
             const {itemId, contentId, content} = req.body;
@@ -171,6 +189,69 @@ class Codexes {
         }
     }
 
+    async editContentDetachment(req,res){
+        try {
+
+            const {itemId, detachmentId, detachment} = req.body;
+
+            const result = await Codex.findOneAndUpdate(
+                {
+                    _id: req.params.id,
+                    'items._id': itemId,
+                    'items.detachments._id': detachmentId,
+                },
+                {
+                    $set: {
+                        'items.$[item].detachments.$[rule].detachment': req.body.detachment,
+                    },
+                },
+                {
+                    arrayFilters: [
+                        {'item._id': itemId}, // Фильтр для элемента в массиве items
+                        {'rule._id': detachmentId}, // Фильтр для элемента в массиве rules
+                    ],
+                    new: true, // Возвращает обновленный документ
+                }
+            );
+
+            res.status(200).json({error: false, message: "Codex successfully update"})
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async updateDetachmentTitle(req,res){
+        try {
+            const {itemId, detachmentId, title} = req.body;
+
+            const result = await Codex.findOneAndUpdate(
+                {
+                    _id: req.params.id,
+                    'items._id': itemId,
+                    'items.detachments._id': detachmentId,
+                },
+                {
+                    $set: {
+                        'items.$[item].detachments.$[rule].title': req.body.title,
+                    },
+                },
+                {
+                    arrayFilters: [
+                        {'item._id': itemId}, // Фильтр для элемента в массиве items
+                        {'rule._id': detachmentId}, // Фильтр для элемента в массиве rules
+                    ],
+                    new: true, // Возвращает обновленный документ
+                }
+            );
+
+            res.status(200).json({error: false, message: "Codex successfully update"})
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
     async deleteContent(req, res) {
         try {
 
@@ -193,6 +274,32 @@ class Codexes {
             res.status(200).json({error: false, message: "Codex successfully delete"})
 
         } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async deleteDetachment(req,res){
+        try {
+
+            const {itemId, detachmentId} = req.body;
+
+            const result = await Codex.findOneAndUpdate(
+                {
+                    _id: req.params.id,
+                    'items._id': itemId,
+                },
+                {
+                    $pull: {
+                        'items.$.detachments': {_id: detachmentId}, // Удаляем правило по ID
+                    },
+                },
+                {
+                    new: true,
+                })
+
+            res.status(200).json({error: false, message: "Detachment successfully delete"})
+        }catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
