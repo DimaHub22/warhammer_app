@@ -8,7 +8,8 @@ const Codex = new Schema({
             name: String,
             image: String,
             rules: [{content: String}],
-            detachments:[{title:String, detachment:String}]
+            detachments:[{title:String, detachment:String}],
+            enhancements:[{content: String, detachmentId:String, enchantPts:Number}]
         }
         ]
 })

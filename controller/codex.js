@@ -155,6 +155,26 @@ class Codexes {
         }
     }
 
+    async updateContentEnhancement(req,res){
+        try {
+
+            const content = {
+                content: req.body.content,
+                detachmentId: req.body.detachmentId,
+                enchantPts: req.body.enchantPts
+            };
+
+            const codexUp = await Codex.findOneAndUpdate({'items._id': req.params.id},
+                {$push: {'items.$.enhancements': content}})
+
+            res.status(201).json({error: false, message: "Codex successfully created"})
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
     async editContent(req, res) {
         try {
             const {itemId, contentId, content} = req.body;
@@ -184,6 +204,42 @@ class Codexes {
 
 
         } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async editContentEnhancement(req,res){
+        try {
+
+            const {itemId, detachmentId, content,enchantPts} = req.body;
+
+            const result = await Codex.findOneAndUpdate(
+                {
+                    _id: req.params.id,
+                    'items._id': itemId,
+                    'items.enhancements._id': detachmentId,
+                },
+                {
+                    $set: {
+                        'items.$[item].enhancements.$[rule].content': req.body.content,
+                        'items.$[item].enhancements.$[rule].enchantPts': req.body.enchantPts,
+
+                    },
+                },
+                {
+                    arrayFilters: [
+                        {'item._id': itemId}, // Фильтр для элемента в массиве items
+                        {'rule._id': detachmentId}, // Фильтр для элемента в массиве rules
+                    ],
+                    new: true, // Возвращает обновленный документ
+                }
+            );
+
+
+            res.status(200).json({error: false, message: "Codex successfully update"})
+
+        }catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
@@ -274,6 +330,33 @@ class Codexes {
             res.status(200).json({error: false, message: "Codex successfully delete"})
 
         } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async deleteContentEnhancement(req,res){
+        try {
+
+            const {itemId, detachmentId} = req.body;
+
+            const result = await Codex.findOneAndUpdate(
+                {
+                    _id: req.params.id,
+                    'items._id': itemId,
+                },
+                {
+                    $pull: {
+                        'items.$.enhancements': {_id: detachmentId}, // Удаляем правило по ID
+                    },
+                },
+                {
+                    new: true,
+                })
+
+            res.status(200).json({error: false, message: "Codex successfully delete"})
+
+        }catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
