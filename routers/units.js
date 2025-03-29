@@ -4,6 +4,7 @@ const Unit = require('../controller/units')
 const upload = require('../middleware/upload')
 const AddedArmy = require("../controller/addedArmy");
 
+router.delete('/:id', Unit.deleteUnit)
 router.get('/', Unit.getUnits)
 router.get('/:id', Unit.getUnitId)
 router.post('/create', upload.single('image'), Unit.createUnit)
@@ -23,7 +24,7 @@ router.get('/search-transport/transport', Unit.searchSquadUnitTransport)
 router.patch('/:id', upload.single('image'), Unit.updateUnit)
 router.patch('/screen-one/:id', upload.single('image'), Unit.screenOne)
 router.patch('/screen-two/:id', upload.single('image'), Unit.screenSecond)
-router.delete('/:id', Unit.deleteUnit)
+
 
 
 

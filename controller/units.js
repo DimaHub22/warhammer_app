@@ -71,6 +71,7 @@ class Unit {
             const unit  = await Units.findOne({_id:req.params.id})
             res.status(200).json(unit)
 
+
         }catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
@@ -301,9 +302,7 @@ class Unit {
             const units = await Units.find(
                 {'race':req.query.codex}
             )
-            console.log(units)
             res.json(units)
-
 
         }catch (e) {
             console.log(e)

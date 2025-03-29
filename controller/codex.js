@@ -74,6 +74,32 @@ class Codexes {
         }
     }
 
+    async changeCodexForCategory(req,res){
+        try {
+            const {newCategoryId} = req.body
+            const codex = await Codex.findOne({'items._id': req.params.id},{"items.$": 1})
+
+            const lastCategoryId = codex._id
+            const codexChoice = codex.items[0]
+            console.log(lastCategoryId)
+
+            const newCategory = await Codex.findOneAndUpdate({_id:newCategoryId},
+                {$push:{'items': codexChoice}})
+
+
+            await Codex.findOneAndUpdate({_id: lastCategoryId},
+                {$pull:{'items':{_id:codexChoice._id}}})
+
+
+
+            res.status(201).json({error: false, message: "Codex successfully created"})
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
     async getCodex(req, res) {
         try {
             const codex = await Codex.find()
