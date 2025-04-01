@@ -24,6 +24,7 @@ router.get('/search-transport/transport', Unit.searchSquadUnitTransport)
 router.patch('/:id', upload.single('image'), Unit.updateUnit)
 router.patch('/screen-one/:id', upload.single('image'), Unit.screenOne)
 router.patch('/screen-two/:id', upload.single('image'), Unit.screenSecond)
+router.patch('/update-enchancement/:id',Unit.updateEnchancements)
 
 
 

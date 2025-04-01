@@ -187,7 +187,8 @@ class Codexes {
             const content = {
                 content: req.body.content,
                 detachmentId: req.body.detachmentId,
-                enchantPts: req.body.enchantPts
+                enchantPts: req.body.enchantPts,
+                name: req.body.name
             };
 
             const codexUp = await Codex.findOneAndUpdate({'items._id': req.params.id},
@@ -250,6 +251,7 @@ class Codexes {
                     $set: {
                         'items.$[item].enhancements.$[rule].content': req.body.content,
                         'items.$[item].enhancements.$[rule].enchantPts': req.body.enchantPts,
+                        'items.$[item].enhancements.$[rule].name': req.body.name,
 
                     },
                 },

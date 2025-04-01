@@ -7,10 +7,10 @@ class AddUnit {
     async addUnit(req, res) {
         try {
 
-            const {idCodex, name, image, dateChange} = req.body
+            const {idCodex, name, image, dateChange,detachment} = req.body
 
             const newUnit = await new AddedUnits({
-                idCodex, name, image, dateChange
+                idCodex, name, image, dateChange,detachment
             })
             await newUnit.save()
 
@@ -24,10 +24,10 @@ class AddUnit {
 
     async duplicateRace(req, res) {
         try {
-            const {idCodex, name, image, listName, favorite, _id, dateChange} = req.body.codex
+            const {idCodex, name, image, listName, favorite, _id, dateChange,detachment} = req.body.codex
 
             const codexNew = await new AddedUnits({
-                idCodex, name, image, listName, favorite, dateChange
+                idCodex, name, image, listName, favorite, dateChange,detachment
             })
             await codexNew.save()
 
@@ -216,10 +216,11 @@ class AddUnit {
 
     async updateLongList(req, res) {
         try {
+            const {listName,detachment} = req.body
 
             await AddedUnits.findOneAndUpdate(
                 {_id: req.params.id},
-                {$set: req.body},
+                {$set: {"listName":listName, "detachment":detachment }},
                 {new: true}
             )
             res.status(200).json({error: false, message: "Update access"})

@@ -12,7 +12,9 @@ const AddedUnits = new Schema({
         type:Boolean,
         default:false
     },
-    dateChange:String
+    dateChange:String,
+    detachment:String
+
 })
 
 module.exports = model('AddedUnits', AddedUnits)

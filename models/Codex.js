@@ -9,7 +9,7 @@ const Codex = new Schema({
             image: String,
             rules: [{content: String}],
             detachments:[{title:String, detachment:String}],
-            enhancements:[{content: String, detachmentId:String, enchantPts:Number}]
+            enhancements:[{content: String, detachmentId:String, enchantPts:Number,name:String}]
         }
         ]
 })

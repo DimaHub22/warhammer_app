@@ -326,6 +326,20 @@ class Unit {
         }
     }
 
+    async updateEnchancements(req,res){
+        try {
+
+            const {enchancements} = req.body
+
+            await Units.findOneAndUpdate({_id:req.params.id},
+                {$set:{'enchancements': enchancements}})
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
 
 }
 
