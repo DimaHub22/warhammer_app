@@ -49,7 +49,13 @@ const AddedArmy = new Schema({
     attachTransport:[String],
     attachUnitTransport:[String],
     attach:[String],
-    lastId:String
+    lastId:String,
+    enchantmentUnit: {
+        name:String,
+        detachmentId:String,
+        enchantPts:Number,
+        enchantId:String
+    }
 
 })
 

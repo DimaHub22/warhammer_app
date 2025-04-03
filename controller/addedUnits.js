@@ -34,6 +34,8 @@ class AddUnit {
 
             const units = await AddedArmy.find({"codexId": _id})
 
+            console.log(units)
+
             if (units && units.length !== 0) {
 
                 let newCodex2 = []
@@ -68,6 +70,12 @@ class AddUnit {
                         attachTransport: item.attachTransport,
                         attachUnitsForTransport: item.attachUnitsForTransport,
                         attach: item.attach,
+                        enchantmentUnit: {
+                            name:item.enchantmentUnit.name,
+                            detachmentId:item.enchantmentUnit.detachmentId,
+                            enchantPts:item.enchantmentUnit.enchantPts,
+                            enchantId:item.enchantmentUnit.enchantId
+                        }
                         // lastId: item._id
                     }
                     newCodex2.push(newUnits)
@@ -223,6 +231,10 @@ class AddUnit {
                 {$set: {"listName":listName, "detachment":detachment }},
                 {new: true}
             )
+
+            await AddedArmy.updateMany({'codexId':req.params.id},
+                {$set:{'enchantmentUnit':{}}})
+
             res.status(200).json({error: false, message: "Update access"})
 
         } catch (e) {

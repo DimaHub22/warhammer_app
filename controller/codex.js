@@ -1,4 +1,5 @@
 const Codex = require('../models/Codex')
+const AddedArmy = require('../models/AddedArmy')
 
 
 class Codexes {
@@ -263,6 +264,9 @@ class Codexes {
                     new: true, // Возвращает обновленный документ
                 }
             );
+
+           const units =  await AddedArmy.updateMany({'enchantmentUnit.enchantId':detachmentId},
+               {$set:{"enchantmentUnit.name":req.body.name,"enchantmentUnit.enchantPts": req.body.enchantPts}})
 
 
             res.status(200).json({error: false, message: "Codex successfully update"})

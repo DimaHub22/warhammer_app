@@ -21,6 +21,7 @@ router.patch('/duplicate-squad/:id', AddedArmy.duplicateArmySquad)
 
 router.patch('/count/:id', AddedArmy.updateCoutn)
 router.patch('/disembark-transport/:id', AddedArmy.disembarkTransport)
+router.patch('/change-enchantment/:id', AddedArmy.changeEnchantmentUnit)
 
 
 

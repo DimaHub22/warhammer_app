@@ -97,8 +97,10 @@ class AddArmy {
                 screenshotSecond,
                 squad,
                 transportCount,
-                unitId
-            } = req.body
+                unitId,
+                enchantmentUnit
+            } = req.body.unit
+
             const unit = await new AddedArmy({
                 attach,
                 attachTransport,
@@ -123,7 +125,8 @@ class AddArmy {
                 screenshotSecond,
                 squad,
                 transportCount,
-                unitId
+                unitId,
+                enchantmentUnit
             })
 
             await unit.save()
@@ -191,6 +194,12 @@ class AddArmy {
                         attachTransport: item.attachTransport,
                         attachUnitsForTransport: item.attachUnitsForTransport,
                         attach: item.attach,
+                        enchantmentUnit: {
+                            name:item.enchantmentUnit.name,
+                            detachmentId:item.enchantmentUnit.detachmentId,
+                            enchantPts:item.enchantmentUnit.enchantPts,
+                            enchantId:item.enchantmentUnit.enchantId
+                        }
                         // lastId: item._id
                     }
                     newCodex2.push(newUnits)
@@ -826,6 +835,25 @@ class AddArmy {
     }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
+   async changeEnchantmentUnit(req,res){
+        try {
+            const {enchantmentUnit} = req.body
+
+            await AddedArmy.findOneAndUpdate({_id:req.params.id},
+                {$set:{'enchantmentUnit':enchantmentUnit}})
+
+            res.status(200).json({error: false, message: "Update enchantment"})
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
 }
+
+
+
+
 
 module.exports = new AddArmy()
