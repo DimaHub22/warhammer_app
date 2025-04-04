@@ -55,7 +55,8 @@ const AddedArmy = new Schema({
         detachmentId:String,
         enchantPts:Number,
         enchantId:String
-    }
+    },
+    secondName:String
 
 })
 

@@ -9,7 +9,7 @@ class Unit {
     async createUnit(req, res) {
         try {
 
-            const {categoryId, name, pts, image, race, keywords} = req.body
+            const {categoryId, name, pts, image, race, keywords,secondName} = req.body
 
 
             const newUnit = new Units({
@@ -18,7 +18,8 @@ class Unit {
                 pts,
                 image: req.file ? req.file.path : '',
                 race,
-                keywords
+                keywords,
+                secondName
             })
 
             await newUnit.save()
@@ -164,7 +165,6 @@ class Unit {
         try {
 
             const units = await Units.find({categoryId: req.query.category, race: req.query.idCodex})
-            console.log(req.query)
             res.status(200).json(units)
 
         } catch (e) {
@@ -181,12 +181,15 @@ class Unit {
                 pts: req.body.pts,
                 // image: req.file ? req.file.path : '',
                 race: req.body.race,
-                keywords: req.body.keywords
+                keywords: req.body.keywords,
+                secondName:req.body.secondName
             }
 
             if (req.file) {
                 update.image = req.file.path
             }
+
+
 
 
             await Units.findOneAndUpdate(

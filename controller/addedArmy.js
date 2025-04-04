@@ -31,7 +31,8 @@ class AddArmy {
                 canBeEmbarkedCount,
                 attachUnitTransport,
                 attachTransport,
-                attach
+                attach,
+                secondName
             } = req.body
 
             const unit = await new AddedArmy({
@@ -57,7 +58,8 @@ class AddArmy {
                 canBeEmbarkedCount,
                 attachUnitTransport,
                 attachTransport,
-                attach
+                attach,
+                secondName
             })
 
 
@@ -98,7 +100,8 @@ class AddArmy {
                 squad,
                 transportCount,
                 unitId,
-                enchantmentUnit
+                enchantmentUnit,
+                secondName
             } = req.body.unit
 
             const unit = await new AddedArmy({
@@ -126,7 +129,8 @@ class AddArmy {
                 squad,
                 transportCount,
                 unitId,
-                enchantmentUnit
+                enchantmentUnit,
+                secondName
             })
 
             await unit.save()
@@ -171,6 +175,7 @@ class AddArmy {
                         unitId: item.unitId,
                         categoryId: item.categoryId,
                         name: item.name,
+                        secondName:item.secondName,
                         pts: item.pts,
                         model: item.model,
                         image: item.image,

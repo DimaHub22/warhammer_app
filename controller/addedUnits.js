@@ -47,6 +47,7 @@ class AddUnit {
                         unitId: item.unitId,
                         categoryId: item.categoryId,
                         name: item.name,
+                        secondName: item.secondName,
                         pts: item.pts,
                         model: item.model,
                         image: item.image,

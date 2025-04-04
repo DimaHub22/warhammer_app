@@ -7,6 +7,10 @@ const Unit = new Schema({
         required: true
     },
     name:String,
+    secondName:{
+        type: String,
+        default: ''
+    },
     pts:{
         type:Number,
         default: 0
