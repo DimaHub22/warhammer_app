@@ -13,7 +13,8 @@ const AddedUnits = new Schema({
         default:false
     },
     dateChange:String,
-    detachment:String
+    detachment:String,
+    lock:Boolean
 
 })
 

@@ -163,6 +163,20 @@ class AddUnit {
         }
     }
 
+    async lockCodex(req,res){
+        try {
+
+            const {lock} = req.body
+
+            const codex = await AddedUnits.findOneAndUpdate({_id: req.params.id}, {$set: {'lock': lock}})
+
+            res.status(200).json({error: false, message: "Lock codex"})
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
     async addDateForCodex(req, res) {
         try {
 

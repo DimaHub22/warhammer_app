@@ -10,6 +10,7 @@ router.post('/duplicate-race', AddedUnits.duplicateRace)
 router.delete('/:id', AddedUnits.deleteAddedUnit)
 router.patch('/list/:id', AddedUnits.updateLongList)
 router.patch('/favorite-race/:id', AddedUnits.favoriteRace)
+router.patch('/update-lock/:id',AddedUnits.lockCodex)
 router.patch('/date/:id', AddedUnits.addDateForCodex)
 
 
