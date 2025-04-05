@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose')
 require('dotenv').config()
 const cors = require('cors')
+const compression = require('compression');
 
 const codex = require('./routers/codex')
 const categories = require('./routers/categories')
@@ -18,6 +19,7 @@ const PORT = process.env.PORT || 5000
 
 const app = express()
 app.use(cors());
+app.use(compression()); // Включает gzip для всех ответов
 app.use('/uploads', express.static('uploads'))
 app.use(express.urlencoded({extended: true}))
 app.use(express.json())
