@@ -20,7 +20,45 @@ const PORT = process.env.PORT || 5000
 const app = express()
 app.use(cors());
 app.use(compression()); // Включает gzip для всех ответов
-app.use('/uploads', express.static('uploads'))
+app.use('/uploads', express.static('uploads',{
+    setHeaders: (res, filePath) => {
+        // Оптимальные заголовки кэширования для разных типов файлов
+        const ext = path.extname(filePath).toLowerCase();
+        const imageExtensions = ['.webp', '.jpg', '.jpeg', '.png', '.gif'];
+
+
+        if (imageExtensions.includes(ext)) {
+            // Изображения - кэш на 1 год
+            res.set('Cache-Control', 'public, max-age=604800');
+        }
+
+        // if (imageExtensions.includes(ext)) {
+        //     // Изображения - кэш на 1 год
+        //     res.set('Cache-Control', 'public, max-age=31536000, immutable');
+        // } else if (mediaExtensions.includes(ext)) {
+        //     // Медиа - кэш на 1 месяц
+        //     res.set('Cache-Control', 'public, max-age=2592000');
+        // } else if (docExtensions.includes(ext)) {
+        //     // Документы - кэш на 1 неделю
+        //     res.set('Cache-Control', 'public, max-age=604800');
+        // } else {
+        //     // Остальные файлы - кэш на 1 час
+        //     res.set('Cache-Control', 'public, max-age=3600');
+        // }
+
+        // // Безопасность (CORS)
+        // res.set('Access-Control-Allow-Origin', 'https://yourdomain.com');
+        //
+        // // Дополнительные заголовки безопасности
+        // res.set('X-Content-Type-Options', 'nosniff');
+        // res.set('Cross-Origin-Resource-Policy', 'same-site');
+        //
+        // // Отключаем ETag для статики с хешами в именах
+        // if (filePath.match(/\.[a-f0-9]{8}\./)) {
+        //     res.removeHeader('ETag');
+        // }
+    }
+}))
 app.use(express.urlencoded({extended: true}))
 app.use(express.json())
 
