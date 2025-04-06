@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 require('dotenv').config()
 const cors = require('cors')
 const compression = require('compression');
+const path = require('path');
 
 const codex = require('./routers/codex')
 const categories = require('./routers/categories')
@@ -24,7 +25,7 @@ app.use('/uploads', express.static('uploads',{
     setHeaders: (res, filePath) => {
         // Оптимальные заголовки кэширования для разных типов файлов
         const ext = path.extname(filePath).toLowerCase();
-        const imageExtensions = ['.webp', '.jpg', '.jpeg', '.png', '.gif'];
+        const imageExtensions = ['.webp', '.jpg', '.jpeg', '.png', '.gif', '.svg'];
 
 
         if (imageExtensions.includes(ext)) {
