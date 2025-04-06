@@ -29,7 +29,7 @@ app.use('/uploads', express.static('uploads',{
 
         if (imageExtensions.includes(ext)) {
             // Изображения - кэш на 1 год
-            res.set('Cache-Control', 'public, max-age=604800');
+            res.set('Cache-Control', 'public, max-age=604800, immutable');
         }
 
         // if (imageExtensions.includes(ext)) {
@@ -59,8 +59,10 @@ app.use('/uploads', express.static('uploads',{
         // }
     }
 }))
+
 app.use(express.urlencoded({extended: true}))
 app.use(express.json())
+app.disable('x-powered-by');
 
 app.use('/codex',codex)
 app.use('/category',categories)
