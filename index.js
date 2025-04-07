@@ -48,7 +48,7 @@ app.use('/uploads', express.static('uploads',{
         // }
 
         // Безопасность (CORS)
-        res.set('Access-Control-Allow-Origin', 'http://89.117.145.43');
+        res.set('Access-Control-Allow-Origin', ['http://89.117.145.43','http://89.117.145.43:8080']);
 
 
         // Дополнительные заголовки безопасности
