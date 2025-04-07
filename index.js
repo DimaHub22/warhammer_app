@@ -19,17 +19,7 @@ const PORT = process.env.PORT || 5000
 
 
 const app = express()
-app.use(cors({
-    origin: [
-        'http://89.117.145.43',
-        'http://89.117.145.43:8080',
-        // /\.yourdomain\.com$/ // Регулярка для поддоменов
-    ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-    maxAge: 86400 // Предварительные запросы кешируются на 24 часа
-}));
+app.use(cors());
 app.use(compression()); // Включает gzip для всех ответов
 app.use('/uploads', express.static('uploads',{
     setHeaders: (res, filePath,req) => {
