@@ -22,7 +22,7 @@ const app = express()
 app.use(cors());
 app.use(compression()); // Включает gzip для всех ответов
 app.use('/uploads', express.static('uploads',{
-    setHeaders: (res, filePath) => {
+    setHeaders: (res, filePath,req) => {
         // Оптимальные заголовки кэширования для разных типов файлов
         const ext = path.extname(filePath).toLowerCase();
         const imageExtensions = ['.webp', '.jpg', '.jpeg', '.png', '.gif', '.svg'];
@@ -47,8 +47,15 @@ app.use('/uploads', express.static('uploads',{
         //     res.set('Cache-Control', 'public, max-age=3600');
         // }
 
-        // Безопасность (CORS)
-        res.set('Access-Control-Allow-Origin', ['http://89.117.145.43','http://89.117.145.43:8080']);
+        const allowedOrigins = ['http://89.117.145.43', 'http://89.117.145.43:8080'];
+        const requestOrigin = req.headers.origin;
+
+        if (allowedOrigins.includes(requestOrigin)) {
+            res.set('Access-Control-Allow-Origin', requestOrigin);
+        }
+
+        // // Безопасность (CORS)
+        // res.set('Access-Control-Allow-Origin', ['http://89.117.145.43','http://89.117.145.43:8080']);
 
 
         // Дополнительные заголовки безопасности
