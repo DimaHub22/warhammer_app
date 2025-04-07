@@ -27,7 +27,7 @@ const corsOptions = {
         'http://localhost', // для разработки
         'http://localhost:8080' // для разработки
     ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
     optionsSuccessStatus: 200
@@ -45,21 +45,6 @@ app.use('/uploads', express.static('uploads',{
             // Изображения - кэш на 1 год
             res.set('Cache-Control', 'public, max-age=604800, immutable');
         }
-
-        // if (imageExtensions.includes(ext)) {
-        //     // Изображения - кэш на 1 год
-        //     res.set('Cache-Control', 'public, max-age=31536000, immutable');
-        // } else if (mediaExtensions.includes(ext)) {
-        //     // Медиа - кэш на 1 месяц
-        //     res.set('Cache-Control', 'public, max-age=2592000');
-        // } else if (docExtensions.includes(ext)) {
-        //     // Документы - кэш на 1 неделю
-        //     res.set('Cache-Control', 'public, max-age=604800');
-        // } else {
-        //     // Остальные файлы - кэш на 1 час
-        //     res.set('Cache-Control', 'public, max-age=3600');
-        // }
-
 
         // Заголовки безопасности
         res.set('X-Content-Type-Options', 'nosniff');
