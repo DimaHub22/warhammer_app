@@ -57,20 +57,18 @@ app.use('/uploads', express.static('uploads',{
         //     res.set('Cache-Control', 'public, max-age=3600');
         // }
 
-        // const allowedOrigins = ['http://89.117.145.43', 'http://89.117.145.43:8080'];
-        // const requestOrigin = req.headers.origin;
-        //
-        // if (allowedOrigins.includes(requestOrigin)) {
-        //     res.set('Access-Control-Allow-Origin', requestOrigin);
-        // }
 
         // // Безопасность (CORS)
-        // res.set('Access-Control-Allow-Origin', ['http://89.117.145.43','http://89.117.145.43:8080']);
+        const allowedOrigins = ['http://89.117.145.43', 'http://89.117.145.43:8080'];
+        if (allowedOrigins.includes(req.headers.origin)) {
+            res.set('Access-Control-Allow-Origin', req.headers.origin);
+        }
 
 
         // Дополнительные заголовки безопасности
         res.set('X-Content-Type-Options', 'nosniff');
-        res.set('Cross-Origin-Resource-Policy', 'same-site');
+        res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+        // res.set('Cross-Origin-Resource-Policy', 'same-site');
         //
         // Отключаем ETag для статики с хешами в именах
         if (filePath.match(/\.[a-f0-9]{8}\./)) {
