@@ -24,7 +24,7 @@ const corsOptions = {
     origin: [
         'http://89.117.145.43',
         'http://89.117.145.43:8080',
-        'http://localhost', // для разработки
+        'http://localhost:4200', // для разработки
         'http://localhost:8080' // для разработки
     ],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
