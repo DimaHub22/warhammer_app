@@ -47,17 +47,18 @@ app.use('/uploads', express.static('uploads',{
         //     res.set('Cache-Control', 'public, max-age=3600');
         // }
 
-        // // Безопасность (CORS)
-        // res.set('Access-Control-Allow-Origin', 'https://yourdomain.com');
+        // Безопасность (CORS)
+        res.set('Access-Control-Allow-Origin', 'http://89.117.145.43');
+
+
+        // Дополнительные заголовки безопасности
+        res.set('X-Content-Type-Options', 'nosniff');
+        res.set('Cross-Origin-Resource-Policy', 'same-site');
         //
-        // // Дополнительные заголовки безопасности
-        // res.set('X-Content-Type-Options', 'nosniff');
-        // res.set('Cross-Origin-Resource-Policy', 'same-site');
-        //
-        // // Отключаем ETag для статики с хешами в именах
-        // if (filePath.match(/\.[a-f0-9]{8}\./)) {
-        //     res.removeHeader('ETag');
-        // }
+        // Отключаем ETag для статики с хешами в именах
+        if (filePath.match(/\.[a-f0-9]{8}\./)) {
+            res.removeHeader('ETag');
+        }
     }
 }))
 
