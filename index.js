@@ -19,10 +19,23 @@ const PORT = process.env.PORT || 5000
 
 
 const app = express()
-app.use(cors());
+// Настройка CORS с конкретными origin
+const corsOptions = {
+    origin: [
+        'http://89.117.145.43',
+        'http://89.117.145.43:8080',
+        'http://localhost', // для разработки
+        'http://localhost:8080' // для разработки
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+    optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 app.use(compression()); // Включает gzip для всех ответов
 app.use('/uploads', express.static('uploads',{
-    setHeaders: (res, filePath,req) => {
+    setHeaders: (res, filePath) => {
         // Оптимальные заголовки кэширования для разных типов файлов
         const ext = path.extname(filePath).toLowerCase();
         const imageExtensions = ['.webp', '.jpg', '.jpeg', '.png', '.gif', '.svg'];
@@ -48,20 +61,11 @@ app.use('/uploads', express.static('uploads',{
         // }
 
 
-        // // Безопасность (CORS)
-        const allowedOrigins = ['http://89.117.145.43', 'http://89.117.145.43:8080'];
-        if (allowedOrigins.includes(req.headers.origin)) {
-            res.set('Access-Control-Allow-Origin', req.headers.origin);
-        }
-
-
-        // Дополнительные заголовки безопасности
+        // Заголовки безопасности
         res.set('X-Content-Type-Options', 'nosniff');
         res.set('Cross-Origin-Resource-Policy', 'cross-origin');
-        // res.set('Cross-Origin-Resource-Policy', 'same-site');
-        //
-        // Отключаем ETag для статики с хешами в именах
-        if (filePath.match(/\.[a-f0-9]{8}\./)) {
+
+        if (filePath.match(/\.[a-f0-9]{8,}\./i)) {
             res.removeHeader('ETag');
         }
     }
