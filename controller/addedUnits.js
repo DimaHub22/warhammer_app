@@ -7,10 +7,10 @@ class AddUnit {
     async addUnit(req, res) {
         try {
 
-            const {idCodex, name, image, dateChange,detachment} = req.body
+            const {idCodex, name, image, dateChange, detachment} = req.body
 
             const newUnit = await new AddedUnits({
-                idCodex, name, image, dateChange,detachment
+                idCodex, name, image, dateChange, detachment
             })
             await newUnit.save()
 
@@ -24,10 +24,10 @@ class AddUnit {
 
     async duplicateRace(req, res) {
         try {
-            const {idCodex, name, image, listName, favorite, _id, dateChange,detachment} = req.body.codex
+            const {idCodex, name, image, listName, favorite, _id, dateChange, detachment} = req.body.codex
 
             const codexNew = await new AddedUnits({
-                idCodex, name, image, listName, favorite, dateChange,detachment
+                idCodex, name, image, listName, favorite, dateChange, detachment
             })
             await codexNew.save()
 
@@ -72,10 +72,10 @@ class AddUnit {
                         attachUnitsForTransport: item.attachUnitsForTransport,
                         attach: item.attach,
                         enchantmentUnit: {
-                            name:item.enchantmentUnit.name,
-                            detachmentId:item.enchantmentUnit.detachmentId,
-                            enchantPts:item.enchantmentUnit.enchantPts,
-                            enchantId:item.enchantmentUnit.enchantId
+                            name: item.enchantmentUnit.name,
+                            detachmentId: item.enchantmentUnit.detachmentId,
+                            enchantPts: item.enchantmentUnit.enchantPts,
+                            enchantId: item.enchantmentUnit.enchantId
                         }
                         // lastId: item._id
                     }
@@ -134,13 +134,10 @@ class AddUnit {
 
                 // res.status(201).json({error: false, message: "Duplicate race"})
                 res.status(201).json(codexNew)
-            }else{
+            } else {
                 // res.status(201).json({error: false, message: "Duplicate race"})
                 res.status(201).json(codexNew)
             }
-
-
-
 
 
         } catch (e) {
@@ -163,7 +160,7 @@ class AddUnit {
         }
     }
 
-    async lockCodex(req,res){
+    async lockCodex(req, res) {
         try {
 
             const {lock} = req.body
@@ -239,16 +236,18 @@ class AddUnit {
 
     async updateLongList(req, res) {
         try {
-            const {listName,detachment} = req.body
+            const {listName, detachment, changeDetach} = req.body
 
             await AddedUnits.findOneAndUpdate(
                 {_id: req.params.id},
-                {$set: {"listName":listName, "detachment":detachment }},
+                {$set: {"listName": listName, "detachment": detachment}},
                 {new: true}
             )
+            if (changeDetach) {
+                await AddedArmy.updateMany({'codexId': req.params.id},
+                    {$set: {'enchantmentUnit': {}}})
+            }
 
-            await AddedArmy.updateMany({'codexId':req.params.id},
-                {$set:{'enchantmentUnit':{}}})
 
             res.status(200).json({error: false, message: "Update access"})
 
