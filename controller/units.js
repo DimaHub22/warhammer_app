@@ -337,6 +337,7 @@ class Unit {
             await Units.findOneAndUpdate({_id:req.params.id},
                 {$set:{'enchancements': enchancements}})
 
+            res.status(200).json({error: false, message: "Update enchancements"})
         }catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
