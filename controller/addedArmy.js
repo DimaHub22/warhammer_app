@@ -199,12 +199,12 @@ class AddArmy {
                         attachTransport: item.attachTransport,
                         attachUnitsForTransport: item.attachUnitsForTransport,
                         attach: item.attach,
-                        enchantmentUnit: {
-                            name:item.enchantmentUnit.name,
-                            detachmentId:item.enchantmentUnit.detachmentId,
-                            enchantPts:item.enchantmentUnit.enchantPts,
-                            enchantId:item.enchantmentUnit.enchantId
-                        }
+                        // enchantmentUnit: {
+                        //     name:item.enchantmentUnit.name,
+                        //     detachmentId:item.enchantmentUnit.detachmentId,
+                        //     enchantPts:item.enchantmentUnit.enchantPts,
+                        //     enchantId:item.enchantmentUnit.enchantId
+                        // }
                         // lastId: item._id
                     }
                     newCodex2.push(newUnits)
