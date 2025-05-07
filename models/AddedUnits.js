@@ -14,7 +14,8 @@ const AddedUnits = new Schema({
     },
     dateChange:String,
     detachment:String,
-    lock:Boolean
+    lock:Boolean,
+    armyPoints:{name:String,pts:Number}
 
 })
 

@@ -24,10 +24,10 @@ class AddUnit {
 
     async duplicateRace(req, res) {
         try {
-            const {idCodex, name, image, listName, favorite, _id, dateChange, detachment} = req.body.codex
+            const {idCodex, name, image, listName, favorite, _id, dateChange, detachment,armyPoints} = req.body.codex
 
             const codexNew = await new AddedUnits({
-                idCodex, name, image, listName, favorite, dateChange, detachment
+                idCodex, name, image, listName, favorite, dateChange, detachment,armyPoints
             })
             await codexNew.save()
 
@@ -236,11 +236,11 @@ class AddUnit {
 
     async updateLongList(req, res) {
         try {
-            const {listName, detachment, changeDetach} = req.body
-
+            const {listName, detachment,armyPoints ,changeDetach} = req.body
+            console.log(armyPoints)
             await AddedUnits.findOneAndUpdate(
                 {_id: req.params.id},
-                {$set: {"listName": listName, "detachment": detachment}},
+                {$set: {"listName": listName, "detachment": detachment, armyPoints}},
                 {new: true}
             )
             if (changeDetach) {
