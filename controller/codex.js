@@ -407,11 +407,14 @@ class Codexes {
                 {
                     $pull: {
                         'items.$.detachments': {_id: detachmentId}, // Удаляем правило по ID
+                        'items.$.enhancements': { detachmentId: detachmentId }
                     },
                 },
                 {
                     new: true,
                 })
+
+
 
             res.status(200).json({error: false, message: "Detachment successfully delete"})
         }catch (e) {
