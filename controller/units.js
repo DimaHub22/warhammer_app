@@ -193,17 +193,16 @@ class Unit {
                 update.image = req.file.path
             }
 
-            await Units.findOneAndUpdate(
+           const resultUpdate =  await Units.findOneAndUpdate(
                 {_id: req.params.id},
-                {$set: update}
+                {$set: update},
+                { new: true }
             )
-
 
             setTimeout(async () => {
                 try {
                     const originUnit = await Units.findOne({_id: req.params.id})
                     const addedArmy = await AddedArmy.find({unitId: req.params.id})
-                    console.log(originUnit)
                     const unitFreePts = []
 
                     //Обновляем начальные данные
@@ -806,7 +805,7 @@ class Unit {
                     console.log(e)
                 }
 
-            }, 3000)
+            }, 2000)
 
             async function processDisembark(attachNotAttach, units) {
 
