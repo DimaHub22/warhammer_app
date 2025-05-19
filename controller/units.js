@@ -193,10 +193,10 @@ class Unit {
                 update.image = req.file.path
             }
 
-           const resultUpdate =  await Units.findOneAndUpdate(
+            const resultUpdate = await Units.findOneAndUpdate(
                 {_id: req.params.id},
                 {$set: update},
-                { new: true }
+                {new: true}
             )
 
             setTimeout(async () => {
@@ -230,17 +230,16 @@ class Unit {
                         }
 
 
-                     const res = await AddedArmy.updateMany(
+                        const res = await AddedArmy.updateMany(
                             {unitId: req.params.id},
-                            {$set: unit}
+                            {$set: unit},
                         )
                     }
-
                     ////////////////
 
                     //Обновляем squad ////
 
-                    if(res.statusMessage === 'OK'){
+                    if (res.statusMessage === 'OK') {
                         setTimeout(async () => {
                             if (addedArmy.length !== 0) {
 
@@ -664,19 +663,22 @@ class Unit {
 
 
                                 const armyId = unitsToProcess.flatMap(e => e.attachUnits)
+                                const arrUnits = unitsToProcess.flatMap(e => String(e._id))
 
-                                unitsToProcess.forEach(async item => {
-
+                                for (const item of unitsToProcess) {
                                     if (item.position === 4) {
                                         const units = await AddedArmy.find({attachUnits: {$in: unitFreePts}})
 
+                                        await removeTransports(unitsToProcess,arrUnits)
+
                                         if (units.length !== 0) {
 
-                                            const arrUnit = units.flatMap(e => e._id)
+                                            const arrUnit = units.flatMap(e => String(e._id))
                                             const army = await AddedArmy.find({attachLeader: {$in: arrUnit}})
 
                                             if (army.length !== 0) {
                                                 const idArmy = army.map(el => el._id)
+
                                                 await AddedArmy.updateMany({_id: {$in: idArmy}}, {
                                                     $set: {
                                                         'join': false,
@@ -696,10 +698,9 @@ class Unit {
                                     }
 
                                     if (item.position === 2 || item.position === 3) {
-
+                                        await removeTransports(unitsToProcess,arrUnits)
                                         if (item.attachUnits.length !== 0) {
                                             if (armyId.length !== 0) {
-
                                                 await AddedArmy.updateMany(
                                                     {_id: {$in: armyId}},
                                                     [
@@ -755,7 +756,8 @@ class Unit {
                                         }
 
                                     }
-                                })
+                                }
+
 
                             }
 
@@ -796,7 +798,7 @@ class Unit {
 
 
 //////// END PTS /////////
-                        },500)
+                        }, 500)
 
                     }
 
@@ -840,6 +842,7 @@ class Unit {
                 }
 
             }
+
             async function validateAndFixTransports(transportAttachUnits) {
 
                 const validTransports = await Promise.all(
@@ -888,6 +891,7 @@ class Unit {
 
                 }
             }
+
             async function removeOverfilledTransports(transportAttachUnits) {
 
                 const validTransports = await Promise.all(
@@ -929,8 +933,8 @@ class Unit {
 
                         const bulkOps = transportId.map(item => ({
                             updateOne: {
-                                filter: { "_id": item.id },
-                                update: { $set: { "count": item.slot } }
+                                filter: {"_id": item.id},
+                                update: {$set: {"count": item.slot}}
                             }
                         }));
 
@@ -939,7 +943,7 @@ class Unit {
                         }
                     }
 
-                    if(resId.some(e => !e.change)){
+                    if (resId.some(e => !e.change)) {
                         const transportId = resId.filter(e => !e.change).flatMap(e => e.id)
 
                         await AddedArmy.updateMany(
@@ -958,6 +962,33 @@ class Unit {
                         );
                     }
 
+                }
+
+            }
+
+            async function removeTransports(units,arrUnit){
+                const transport = units.flatMap(e => e.attachTransport)
+
+                if(transport.length !== 0){
+                    const unitTransports = await AddedArmy.find({unitId: {$in:transport}})
+                    const transportsId = unitTransports.filter(e => e.attachUnitsForTransport.some(el => arrUnit.includes(el))).flatMap(e => e._id)
+
+                    if(transportsId.length !== 0){
+                        await AddedArmy.updateMany(
+                            {_id: {$in: transportsId}},
+                            [
+                                {
+                                    $set: {
+                                        join: false,
+                                        embark:false,
+                                        attachUnitsForTransport: [],
+                                        count: 0,
+                                        categoryId: "$originCategory" // Используем значение из поля originCategory того же документа
+                                    }
+                                }
+                            ]
+                        );
+                    }
                 }
 
             }
