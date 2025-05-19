@@ -203,6 +203,7 @@ class Unit {
                 try {
                     const originUnit = await Units.findOne({_id: req.params.id})
                     const addedArmy = await AddedArmy.find({unitId: req.params.id})
+                    console.log(originUnit)
                     const unitFreePts = []
 
                     //Обновляем начальные данные
@@ -239,7 +240,7 @@ class Unit {
                     ////////////////
 
                     //Обновляем squad ////
-                    console.log(res.statusMessage)
+
                     if(res.statusMessage === 'OK'){
                         setTimeout(async () => {
                             if (addedArmy.length !== 0) {
