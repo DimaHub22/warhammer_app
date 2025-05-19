@@ -573,7 +573,7 @@ class Unit {
 
                                     await validateAndFixTransports(transportAttachUnits)
 
-                                }, 300)
+                                }, 500)
 
 
                             }
@@ -800,7 +800,7 @@ class Unit {
                 }
 
 
-            }, 400)
+            }, 600)
 
             async function processDisembark(attachNotAttach, units) {
 
