@@ -963,7 +963,11 @@ class Unit {
 
             }
 
-            res.status(200).json({error: false, message: "Update"})
+            setTimeout(() => {
+                res.status(200).json({ error: false, message: "Update" });
+            }, 2000); // 2000 миллисекунд = 2 секунды
+
+            // res.status(200).json({error: false, message: "Update"})
 
         } catch (e) {
             console.log(e)
