@@ -806,7 +806,6 @@ class Unit {
                     console.log(e)
                 }
 
-                res.status(200).json({error: false, message: "Update"})
             }, 5000)
 
             async function processDisembark(attachNotAttach, units) {
@@ -964,7 +963,7 @@ class Unit {
 
             }
 
-            // res.status(200).json({error: false, message: "Update"})
+            res.status(200).json({error: false, message: "Update"})
 
         } catch (e) {
             console.log(e)
