@@ -807,7 +807,7 @@ class Unit {
                 }
 
 
-            }, 1000)
+            }, 5000)
 
             async function processDisembark(attachNotAttach, units) {
 
