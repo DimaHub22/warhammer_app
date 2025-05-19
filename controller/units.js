@@ -963,9 +963,8 @@ class Unit {
 
             }
 
-            setTimeout(() => {
-                res.status(200).json({ error: false, message: "Update" });
-            }, 2000); // 2000 миллисекунд = 2 секунды
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            res.status(200).json({ error: false, message: "Update" });
 
             // res.status(200).json({error: false, message: "Update"})
 
