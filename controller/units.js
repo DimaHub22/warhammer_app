@@ -198,7 +198,7 @@ class Unit {
                 {$set: update},
                 {new: true}
             )
-
+            console.log(resultUpdate)
             setTimeout(async () => {
                 try {
                     const originUnit = await Units.findOne({_id: req.params.id})
@@ -669,7 +669,7 @@ class Unit {
                                     if (item.position === 4) {
                                         const units = await AddedArmy.find({attachUnits: {$in: unitFreePts}})
 
-                                        await removeTransports(unitsToProcess,arrUnits)
+                                        await this.removeTransports(unitsToProcess,arrUnits)
 
                                         if (units.length !== 0) {
 
@@ -698,7 +698,7 @@ class Unit {
                                     }
 
                                     if (item.position === 2 || item.position === 3) {
-                                        await removeTransports(unitsToProcess,arrUnits)
+                                        await this.removeTransports(unitsToProcess,arrUnits)
                                         if (item.attachUnits.length !== 0) {
                                             if (armyId.length !== 0) {
                                                 await AddedArmy.updateMany(
@@ -966,32 +966,32 @@ class Unit {
 
             }
 
-            async function removeTransports(units,arrUnit){
-                const transport = units.flatMap(e => e.attachTransport)
-
-                if(transport.length !== 0){
-                    const unitTransports = await AddedArmy.find({unitId: {$in:transport}})
-                    const transportsId = unitTransports.filter(e => e.attachUnitsForTransport.some(el => arrUnit.includes(el))).flatMap(e => e._id)
-
-                    if(transportsId.length !== 0){
-                        await AddedArmy.updateMany(
-                            {_id: {$in: transportsId}},
-                            [
-                                {
-                                    $set: {
-                                        join: false,
-                                        embark:false,
-                                        attachUnitsForTransport: [],
-                                        count: 0,
-                                        categoryId: "$originCategory" // Используем значение из поля originCategory того же документа
-                                    }
-                                }
-                            ]
-                        );
-                    }
-                }
-
-            }
+            // async function removeTransports(units,arrUnit){
+            //     const transport = units.flatMap(e => e.attachTransport)
+            //
+            //     if(transport.length !== 0){
+            //         const unitTransports = await AddedArmy.find({unitId: {$in:transport}})
+            //         const transportsId = unitTransports.filter(e => e.attachUnitsForTransport.some(el => arrUnit.includes(el))).flatMap(e => e._id)
+            //
+            //         if(transportsId.length !== 0){
+            //             await AddedArmy.updateMany(
+            //                 {_id: {$in: transportsId}},
+            //                 [
+            //                     {
+            //                         $set: {
+            //                             join: false,
+            //                             embark:false,
+            //                             attachUnitsForTransport: [],
+            //                             count: 0,
+            //                             categoryId: "$originCategory" // Используем значение из поля originCategory того же документа
+            //                         }
+            //                     }
+            //                 ]
+            //             );
+            //         }
+            //     }
+            //
+            // }
 
 
             res.status(200).json({error: false, message: "Update"})
@@ -1002,33 +1002,114 @@ class Unit {
         }
     }
 
+    async removeTransports(units,arrUnit){
+        const transport = units.flatMap(e => e.attachTransport)
+
+        if(transport.length !== 0){
+            const unitTransports = await AddedArmy.find({unitId: {$in:transport}})
+            const transportsId = unitTransports.filter(e => e.attachUnitsForTransport.some(el => arrUnit.includes(el))).flatMap(e => e._id)
+
+            if(transportsId.length !== 0){
+                await AddedArmy.updateMany(
+                    {_id: {$in: transportsId}},
+                    [
+                        {
+                            $set: {
+                                join: false,
+                                embark:false,
+                                attachUnitsForTransport: [],
+                                count: 0,
+                                categoryId: "$originCategory" // Используем значение из поля originCategory того же документа
+                            }
+                        }
+                    ]
+                );
+            }
+        }
+
+    }
+
     async deleteUnit(req, res) {
         try {
 
             const unit = await Units.findOne({_id: req.params.id})
+
             const addedArmy = await AddedArmy.find({unitId: req.params.id})
-            // console.log(addedArmy)
-            if (unit) {
-                const imageName = unit.image.replace(/uploads/g, '').slice(1)
 
-                fs.access(`${imageName}`, async function (error) {
+            if(addedArmy.length !== 0){
+                const unitJoin = addedArmy.filter(e => e.join)
+                const unitNotJoin = addedArmy.filter(e => !e.join)
 
-                    if (error) {
+                if(unitJoin.length !== 0){
+                    const arrUnitsDelete = unitJoin.flatMap(e => String(e._id))
 
-                        console.log("Файл не найден");
-                        await Units.deleteOne({_id: req.params.id})
+                   // await this.removeTransports(unitJoin, arrUnits)
 
-                    } else {
-                        await fsPromises.rm(`./${unit.image}`);
-                        await Units.deleteOne({_id: req.params.id})
-                        console.log("Файл найден");
+                    for (const item of unitJoin) {
+                        if (item.position === 4) {
+
+                            const units = await AddedArmy.find({attachUnits: {$in: arrUnitsDelete}})
+
+                            if (units.length !== 0) {
+                                const arrUnit = units.flatMap(e => String(e._id))
+                                const army = await AddedArmy.find({attachLeader: {$in: arrUnit}})
+
+                                if (army.length !== 0) {
+                                    const idArmy = army.map(el => String(el._id)).filter(e => !arrUnitsDelete.includes(e))
+                                    console.log(idArmy)
+                                    console.log(arrUnitsDelete)
+
+                                    await AddedArmy.updateMany({_id: {$in: idArmy}}, {
+                                        $set: {
+                                            'join': false,
+                                            'attachLeader': ''
+                                        }
+                                    })
+                                    // await AddedArmy.updateMany({_id: {$in: arrUnit}}, {
+                                    //     $set: {
+                                    //         'join': false,
+                                    //         'attachUnits': []
+                                    //     }
+                                    // })
+                                }
+                                // await AddedArmy.updateMany({_id: {$in: arrUnit}}, {$set: {'join': false}})
+                            }
+
+                        }
+
+
+
 
                     }
 
-                });
 
+
+                }
 
             }
+
+
+            // if (unit) {
+            //     const imageName = unit.image.replace(/uploads/g, '').slice(1)
+            //
+            //     fs.access(`${imageName}`, async function (error) {
+            //
+            //         if (error) {
+            //
+            //             console.log("Файл не найден");
+            //             await Units.deleteOne({_id: req.params.id})
+            //
+            //         } else {
+            //             await fsPromises.rm(`./${unit.image}`);
+            //             await Units.deleteOne({_id: req.params.id})
+            //             console.log("Файл найден");
+            //
+            //         }
+            //
+            //     });
+            //
+            //
+            // }
 
 
             res.status(200).json({error: false, message: "Delete"})
@@ -1046,7 +1127,7 @@ class Unit {
             if (!query) {
                 return res.status(400).json({error: true, message: "Not found"})
             }
-            console.log(req.query)
+
             const units = await Units.find(
                 {'name': {"$regex": query}, 'race': {"$regex": race}}
             )

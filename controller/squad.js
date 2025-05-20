@@ -112,19 +112,22 @@ class Squads {
 
             if (add) {
                 if (!unit.leader.includes(leader)) {
+
                     await Units.updateOne(
                         {_id: req.params.id},
                         {$push: {'leader': leader}}
                     )
                 }
+                res.status(200).json({ error: false, message: "Leader added successfully" });
             } else{
                 await Units.updateOne(
                     {_id: req.params.id},
                     {$pull: {'leader': leader}}
                 )
+                res.status(200).json({ error: false, message: "Leader removed successfully" });
             }
 
-            res.status(200).json({error: false, message: "Added leader"})
+            // res.status(200).json({error: false, message: "Added leader"})
 
         } catch (e) {
             console.log(e)
