@@ -1680,7 +1680,7 @@ class Unit {
                                   if (item.position === 4) {
                                       const units = await AddedArmy.find({attachUnits: {$in: unitFreePts}})
 
-                                      await this.removeTransports(unitsToProcess,arrUnits)
+                                      await removeTransports(unitsToProcess,arrUnits)
 
                                       if (units.length !== 0) {
 
