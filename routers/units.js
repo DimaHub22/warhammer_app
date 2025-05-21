@@ -25,6 +25,7 @@ router.patch('/:id', upload.single('image'), Unit.updateUnit)
 router.patch('/screen-one/:id', upload.single('image'), Unit.screenOne)
 router.patch('/screen-two/:id', upload.single('image'), Unit.screenSecond)
 router.patch('/update-enchancement/:id',Unit.updateEnchancements)
+router.patch('/update-added-units/:id',Unit.updateAllAddedUnits)
 
 
 
