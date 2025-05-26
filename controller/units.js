@@ -340,6 +340,9 @@ class Unit {
                             await AddedArmy.deleteMany({_id: {$in: arrUnitsDelete}})
 
                         }
+                        if(item.position === 1){
+                            await AddedArmy.deleteMany({_id: {$in: arrUnitsDelete}})
+                        }
 
                     }
                 }
