@@ -2,6 +2,8 @@ const Units = require('../models/Units')
 const AddedArmy = require('../models/AddedArmy')
 const {ObjectId} = require('mongodb');
 
+const AddedUnits = require('../models/AddedUnits')
+
 const fsPromises = require('fs/promises');
 const fs = require('fs');
 
@@ -170,7 +172,19 @@ class Unit {
         try {
 
             const units = await Units.find({categoryId: req.query.category, race: req.query.idCodex})
-            res.status(200).json(units)
+
+            const alliedUnits = await Units.find({
+                alliedUnits: req.query.idCodex,
+                categoryAllide: req.query.category // Простая проверка наличия значения в массиве
+            });
+
+            const sameCodexUnits = await Units.find({
+                sameCodex: req.query.idCodex,
+                categoryId: req.query.category
+                // categoryAllide: req.query.category // Простая проверка наличия значения в массиве
+            });
+
+            res.status(200).json([...units, ...alliedUnits, ...sameCodexUnits])
 
         } catch (e) {
             console.log(e)
@@ -331,7 +345,7 @@ class Unit {
                     const arrUnitsDelete = unitNotJoin.flatMap(e => String(e._id))
 
                     for (const item of unitNotJoin) {
-                        if([2,3,4].includes(item.position)){
+                        if ([2, 3, 4].includes(item.position)) {
 
                             const idArmyDelete = unitNotJoin.map(el => String(el._id)).filter(e => arrUnitsDelete.includes(e))
 
@@ -340,7 +354,7 @@ class Unit {
                             await AddedArmy.deleteMany({_id: {$in: arrUnitsDelete}})
 
                         }
-                        if(item.position === 1){
+                        if (item.position === 1) {
                             await AddedArmy.deleteMany({_id: {$in: arrUnitsDelete}})
                         }
 
@@ -522,6 +536,82 @@ class Unit {
         }
     }
 
+    async updateAlliedUnits(req, res) {
+        try {
+            const {alliedUnits, categoryAllide} = req.body
+
+            await Units.findOneAndUpdate({_id: req.params.id},
+                {$set: {'alliedUnits': alliedUnits, 'categoryAllide': categoryAllide}})
+
+            res.status(200).json({error: false, message: "Update allide units"})
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async deleteUnitForAlliedUnits(req, res) {
+        try {
+
+            const {codexId} = req.body
+
+            const codex = await AddedUnits.find({idCodex: codexId})
+
+            const codexIds = codex.flatMap(e => String(e._id))
+
+            const units = await AddedArmy.find({codexId: {$in: codexIds}, alliedUnits: codexId})
+
+            if (units.length !== 0) {
+                const deleteUnit = units.flatMap(e => e._id)
+                await AddedArmy.deleteMany({_id: {$in: deleteUnit}})
+            }
+
+
+            res.status(200).json({error: false, message: "Update allide units"})
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async updateSameCodex(req, res) {
+        try {
+            const {sameCodex} = req.body
+
+            await Units.findOneAndUpdate({_id: req.params.id},
+                {$set: {'sameCodex': sameCodex}})
+
+            res.status(200).json({error: false, message: "Update same codex"})
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async deleteUnitForSameCodex(req, res) {
+        try {
+            const {codexId} = req.body
+
+            const codex = await AddedUnits.find({idCodex: codexId})
+
+            const codexIds = codex.flatMap(e => String(e._id))
+
+            const units = await AddedArmy.find({codexId: {$in: codexIds}, sameCodex: codexId})
+
+            if (units.length !== 0) {
+                const deleteUnit = units.flatMap(e => e._id)
+
+                await AddedArmy.deleteMany({_id: {$in: deleteUnit}})
+            }
+
+            res.status(200).json({error: false, message: "Update same codex"})
+        } catch (e) {
+
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
     async updateAllAddedUnits(req, res) {
         try {
             const originUnit = await Units.findOne({_id: req.params.id})
@@ -548,11 +638,15 @@ class Unit {
                     transportCount: originUnit.transportCount,
                     attachTransport: originUnit.attachTransport,
                     attachUnitTransport: originUnit.attachUnitTransport,
-                    attach: originUnit.attach
+                    attach: originUnit.attach,
+
+                    alliedUnits: originUnit.alliedUnits,
+                    categoryAllide: originUnit.categoryAllide,
+                    sameCodex: originUnit.sameCodex
 
                 }
 
-
+                // console.log(unit)
                 await AddedArmy.updateMany(
                     {unitId: req.params.id},
                     {$set: unit},
@@ -564,6 +658,9 @@ class Unit {
             //Обновляем squad ////
 
             if (addedArmy.length !== 0) {
+                console.log(addedArmy)
+                console.log(originUnit)
+
 
                 const joinUnit = addedArmy.filter(e => e.join)
 
@@ -855,7 +952,6 @@ class Unit {
 
                 if (notJoinUnit.length !== 0) {
 
-
                     const unitTransportId = [...new Set(notJoinUnit.flatMap(e => e.attachTransport))]
 
                     const unitsToEmbark = await AddedArmy.find({unitId: {$in: unitTransportId}});
@@ -866,6 +962,7 @@ class Unit {
                     if (transportEmbark.length !== 0) {
                         await removeOverfilledTransports(transportEmbark)
                     }
+
 
                 }
 
@@ -1245,6 +1342,33 @@ class Unit {
 
             res.status(200).json({error: false, message: "Update"})
 
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async deleteEnchantForAddedUnits(req, res) {
+        try {
+
+            const {enchantId} = req.body
+
+            const units = await AddedArmy.updateMany(
+                {
+                    unitId: req.params.id,
+                    'enchantmentUnit.enchantId': enchantId
+                },
+                {
+                    $set: {
+                        'enchantmentUnit.name':'',
+                        'enchantmentUnit.detachmentId':'',
+                        'enchantmentUnit.enchantPts':0,
+                        'enchantmentUnit.enchantId':''
+        }
+        })
+
+
+            res.status(200).json({error: false, message: "Update enchant"})
         } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})

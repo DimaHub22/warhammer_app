@@ -32,7 +32,10 @@ class AddArmy {
                 attachUnitTransport,
                 attachTransport,
                 attach,
-                secondName
+                secondName,
+                alliedUnits,
+                categoryAllide,
+                sameCodex
             } = req.body
 
             const unit = await new AddedArmy({
@@ -59,7 +62,10 @@ class AddArmy {
                 attachUnitTransport,
                 attachTransport,
                 attach,
-                secondName
+                secondName,
+                alliedUnits,
+                categoryAllide,
+                sameCodex
             })
 
 
@@ -101,7 +107,10 @@ class AddArmy {
                 transportCount,
                 unitId,
                 enchantmentUnit,
-                secondName
+                secondName,
+                alliedUnits,
+                categoryAllide,
+                sameCodex
             } = req.body.unit
 
             const unit = await new AddedArmy({
@@ -130,7 +139,10 @@ class AddArmy {
                 transportCount,
                 unitId,
                 enchantmentUnit,
-                secondName
+                secondName,
+                alliedUnits,
+                categoryAllide,
+                sameCodex
             })
 
             await unit.save()
@@ -154,7 +166,7 @@ class AddArmy {
             if (unit.attachUnits.length !== 0) {
                 const leader = unit
                 const attach = await AddedArmy.find({_id: {$in: leader.attachUnits}})
-                 squad = [leader, ...attach]
+                squad = [leader, ...attach]
 
 
             }
@@ -162,101 +174,99 @@ class AddArmy {
             if (unit.attachLeader) {
                 const leader = await AddedArmy.findOne({_id: unit.attachLeader})
                 const attach = await AddedArmy.find({_id: {$in: leader.attachUnits}})
-                 squad = [leader, ...attach]
+                squad = [leader, ...attach]
             }
 
 
             // if(squad.length !== 0){
-                let newCodex2 = []
-                squad.forEach(item => {
+            let newCodex2 = []
+            squad.forEach(item => {
 
-                    const newUnits = {
-                        _id: item._id,
-                        unitId: item.unitId,
-                        categoryId: item.categoryId,
-                        name: item.name,
-                        secondName:item.secondName,
-                        pts: item.pts,
-                        model: item.model,
-                        image: item.image,
-                        power: item.power,
-                        description: item.description,
-                        race: item.race,
-                        codexId: item.codexId,
-                        join: item.join,
-                        embark: item.embark,
-                        attachLeader: item.attachLeader,
-                        attachUnits: item.attachUnits,
-                        originCategory: item.originCategory,
-                        position: item.position,
-                        squad: item.squad,
-                        screenshotOne: item.screenshotOne,
-                        screenshotSecond: item.screenshotSecond,
-                        count: item.count,
-                        transportCount: item.transportCount,
-                        canBeEmbarkedCount: item.canBeEmbarkedCount,
-                        attachUnitTransport: item.attachUnitTransport,
-                        attachTransport: item.attachTransport,
-                        attachUnitsForTransport: item.attachUnitsForTransport,
-                        attach: item.attach,
-                        // enchantmentUnit: {
-                        //     name:item.enchantmentUnit.name,
-                        //     detachmentId:item.enchantmentUnit.detachmentId,
-                        //     enchantPts:item.enchantmentUnit.enchantPts,
-                        //     enchantId:item.enchantmentUnit.enchantId
-                        // }
-                        // lastId: item._id
-                    }
-                    newCodex2.push(newUnits)
+                const newUnits = {
+                    _id: item._id,
+                    unitId: item.unitId,
+                    categoryId: item.categoryId,
+                    name: item.name,
+                    secondName: item.secondName,
+                    pts: item.pts,
+                    model: item.model,
+                    image: item.image,
+                    power: item.power,
+                    description: item.description,
+                    race: item.race,
+                    codexId: item.codexId,
+                    join: item.join,
+                    embark: item.embark,
+                    attachLeader: item.attachLeader,
+                    attachUnits: item.attachUnits,
+                    originCategory: item.originCategory,
+                    position: item.position,
+                    squad: item.squad,
+                    screenshotOne: item.screenshotOne,
+                    screenshotSecond: item.screenshotSecond,
+                    count: item.count,
+                    transportCount: item.transportCount,
+                    canBeEmbarkedCount: item.canBeEmbarkedCount,
+                    attachUnitTransport: item.attachUnitTransport,
+                    attachTransport: item.attachTransport,
+                    attachUnitsForTransport: item.attachUnitsForTransport,
+                    attach: item.attach,
+                    // enchantmentUnit: {
+                    //     name:item.enchantmentUnit.name,
+                    //     detachmentId:item.enchantmentUnit.detachmentId,
+                    //     enchantPts:item.enchantmentUnit.enchantPts,
+                    //     enchantId:item.enchantmentUnit.enchantId
+                    // }
+                    // lastId: item._id
+                }
+                newCodex2.push(newUnits)
 
-                })
+            })
 
-                const duplicatedArray = newCodex2.map(doc => ({
-                    ...doc,
-                    _id: new ObjectId(),
-                }));
+            const duplicatedArray = newCodex2.map(doc => ({
+                ...doc,
+                _id: new ObjectId(),
+            }));
 
-                const idMapping = {};
-                newCodex2.forEach((oldDoc, index) => {
-                    const newDoc = duplicatedArray[index];
-                    idMapping[oldDoc._id.toString()] = String(newDoc._id);
-                });
+            const idMapping = {};
+            newCodex2.forEach((oldDoc, index) => {
+                const newDoc = duplicatedArray[index];
+                idMapping[oldDoc._id.toString()] = String(newDoc._id);
+            });
 
-                // Шаг 3: Обновляем ссылки в дубликате
-                duplicatedArray.forEach(newDoc => {
-                    // Обновляем attachLeader
-                    if (newDoc.attachLeader && idMapping[newDoc.attachLeader.toString()]) {
-                        newDoc.attachLeader = idMapping[newDoc.attachLeader.toString()];
-                    }
+            // Шаг 3: Обновляем ссылки в дубликате
+            duplicatedArray.forEach(newDoc => {
+                // Обновляем attachLeader
+                if (newDoc.attachLeader && idMapping[newDoc.attachLeader.toString()]) {
+                    newDoc.attachLeader = idMapping[newDoc.attachLeader.toString()];
+                }
 
-                    // Обновляем attachUnits
-                    if (newDoc.attachUnits && newDoc.attachUnits.length > 0) {
-                        newDoc.attachUnits = newDoc.attachUnits.map(unitId => {
-                            return idMapping[unitId.toString()] || unitId;
-                        });
+                // Обновляем attachUnits
+                if (newDoc.attachUnits && newDoc.attachUnits.length > 0) {
+                    newDoc.attachUnits = newDoc.attachUnits.map(unitId => {
+                        return idMapping[unitId.toString()] || unitId;
+                    });
 
-                        [...new Set(newDoc.attachUnits)]
-                    }
+                    [...new Set(newDoc.attachUnits)]
+                }
 
-                });
+            });
 
-                const AddedArmys = [];
-                duplicatedArray.forEach(doc => {
-                    AddedArmys.push(doc); // Добавляем каждый документ в массив
-                });
+            const AddedArmys = [];
+            duplicatedArray.forEach(doc => {
+                AddedArmys.push(doc); // Добавляем каждый документ в массив
+            });
 
 
-                AddedArmy.insertMany(AddedArmys)
-                // AddedArmys.forEach(async item => {
-                //     const unit = await new AddedArmy(item)
-                //
-                //     await unit.save()
-                // })
+            AddedArmy.insertMany(AddedArmys)
+            // AddedArmys.forEach(async item => {
+            //     const unit = await new AddedArmy(item)
+            //
+            //     await unit.save()
+            // })
 
-                res.status(201).json({error: false, message: "Duplicate squad"})
+            res.status(201).json({error: false, message: "Duplicate squad"})
             // }
-
-
 
 
         } catch (e) {
@@ -279,9 +289,23 @@ class AddArmy {
 
     async getArmyOfCodex(req, res) {
         try {
-
+            
             const units = await AddedArmy.find({race: req.params.race, codexId: req.params.codexId})
-            res.status(200).json(units)
+
+            console.log(units)
+            const alliedUnits = await AddedArmy.find({
+                alliedUnits: req.params.race,
+                codexId: req.params.codexId
+                // categoryAllide: req.params.race // Простая проверка наличия значения в массиве
+            });
+
+            const sameCodexUnits = await AddedArmy.find({
+                sameCodex: req.params.race,
+                codexId: req.params.codexId
+                // categoryAllide: req.params.race // Простая проверка наличия значения в массиве
+            });
+
+            res.status(200).json([...units, ...alliedUnits,...sameCodexUnits])
 
         } catch (e) {
             console.log(e)
@@ -840,25 +864,22 @@ class AddArmy {
     }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-   async changeEnchantmentUnit(req,res){
+    async changeEnchantmentUnit(req, res) {
         try {
             const {enchantmentUnit} = req.body
 
-            await AddedArmy.findOneAndUpdate({_id:req.params.id},
-                {$set:{'enchantmentUnit':enchantmentUnit}})
+            await AddedArmy.findOneAndUpdate({_id: req.params.id},
+                {$set: {'enchantmentUnit': enchantmentUnit}})
 
             res.status(200).json({error: false, message: "Update enchantment"})
 
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
     }
 
 }
-
-
-
 
 
 module.exports = new AddArmy()

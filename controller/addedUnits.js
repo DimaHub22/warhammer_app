@@ -34,7 +34,7 @@ class AddUnit {
 
             const units = await AddedArmy.find({"codexId": _id})
 
-            console.log(units)
+            console.log(codexNew)
 
             if (units && units.length !== 0) {
 
@@ -76,7 +76,10 @@ class AddUnit {
                             detachmentId: item.enchantmentUnit.detachmentId,
                             enchantPts: item.enchantmentUnit.enchantPts,
                             enchantId: item.enchantmentUnit.enchantId
-                        }
+                        },
+                        alliedUnits:item.alliedUnits,
+                        categoryAllide:item.categoryAllide,
+                        sameCodex:item.sameCodex
                         // lastId: item._id
                     }
                     newCodex2.push(newUnits)

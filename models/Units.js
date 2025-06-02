@@ -61,7 +61,10 @@ const Unit = new Schema({
     moreSecond:[String],
     attachTransport:[String],
 
-    enchancements:[String]
+    enchancements:[String],
+    alliedUnits:[String],
+    categoryAllide:String,
+    sameCodex:[String]
 
 
 })

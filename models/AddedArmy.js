@@ -56,7 +56,10 @@ const AddedArmy = new Schema({
         enchantPts:Number,
         enchantId:String
     },
-    secondName:String
+    secondName:String,
+    alliedUnits:[String],
+    categoryAllide:String,
+    sameCodex:[String]
 
 })
 
