@@ -239,11 +239,11 @@ class AddUnit {
 
     async updateLongList(req, res) {
         try {
-            const {listName, detachment,armyPoints ,changeDetach} = req.body
-            console.log(armyPoints)
+            const {listName, detachment,armyPoints ,changeDetach,shared} = req.body
+
             await AddedUnits.findOneAndUpdate(
                 {_id: req.params.id},
-                {$set: {"listName": listName, "detachment": detachment, armyPoints}},
+                {$set: {"listName": listName, "detachment": detachment, armyPoints,shared}},
                 {new: true}
             )
             if (changeDetach) {

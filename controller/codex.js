@@ -1,5 +1,6 @@
 const Codex = require('../models/Codex')
 const AddedArmy = require('../models/AddedArmy')
+const AddedUnits = require('../models/AddedUnits')
 
 
 class Codexes {
@@ -75,27 +76,26 @@ class Codexes {
         }
     }
 
-    async changeCodexForCategory(req,res){
+    async changeCodexForCategory(req, res) {
         try {
             const {newCategoryId} = req.body
-            const codex = await Codex.findOne({'items._id': req.params.id},{"items.$": 1})
+            const codex = await Codex.findOne({'items._id': req.params.id}, {"items.$": 1})
 
             const lastCategoryId = codex._id
             const codexChoice = codex.items[0]
-            console.log(lastCategoryId)
 
-            const newCategory = await Codex.findOneAndUpdate({_id:newCategoryId},
-                {$push:{'items': codexChoice}})
+
+            const newCategory = await Codex.findOneAndUpdate({_id: newCategoryId},
+                {$push: {'items': codexChoice}})
 
 
             await Codex.findOneAndUpdate({_id: lastCategoryId},
-                {$pull:{'items':{_id:codexChoice._id}}})
-
+                {$pull: {'items': {_id: codexChoice._id}}})
 
 
             res.status(201).json({error: false, message: "Codex successfully created"})
 
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
@@ -138,7 +138,40 @@ class Codexes {
         try {
 
             const codex = await Codex.findOne({'items._id': req.params.id}, {"items.$": 1})
+
             res.status(200).json(codex)
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async getCodexItems(req, res) {
+        try {
+
+            const {itemId, detachment} = req.body;
+
+            const matchingEnhancements = await Codex.aggregate([
+                // 1. Разворачиваем массив items
+                {$unwind: "$items"},
+
+                // 2. Разворачиваем массив enhancements
+                {$unwind: "$items.enhancements"},
+
+                // 3. Фильтруем только enhancements с нужным detachmentId
+                {$match: {"items.enhancements.detachmentId": req.params.id}},
+
+                // 4. Формируем результат (только нужные данные)
+                {
+                    $project: {
+                        _id: 0, // Исключаем служебные поля
+                        enhancement: "$items.enhancements",
+                    }
+                }
+            ]);
+
+            res.status(200).json(matchingEnhancements)
 
         } catch (e) {
             console.log(e)
@@ -164,7 +197,7 @@ class Codexes {
         }
     }
 
-    async updateDetachment(req,res){
+    async updateDetachment(req, res) {
         try {
             const content = {
                 title: req.body.title,
@@ -176,13 +209,13 @@ class Codexes {
 
             res.status(201).json({error: false, message: "Codex successfully created"})
 
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
     }
 
-    async updateContentEnhancement(req,res){
+    async updateContentEnhancement(req, res) {
         try {
 
             const content = {
@@ -197,7 +230,7 @@ class Codexes {
 
             res.status(201).json({error: false, message: "Codex successfully created"})
 
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
@@ -237,10 +270,10 @@ class Codexes {
         }
     }
 
-    async editContentEnhancement(req,res){
+    async editContentEnhancement(req, res) {
         try {
 
-            const {itemId, detachmentId, content,enchantPts} = req.body;
+            const {itemId, detachmentId, content, enchantPts} = req.body;
 
             const result = await Codex.findOneAndUpdate(
                 {
@@ -265,19 +298,19 @@ class Codexes {
                 }
             );
 
-           const units =  await AddedArmy.updateMany({'enchantmentUnit.enchantId':detachmentId},
-               {$set:{"enchantmentUnit.name":req.body.name,"enchantmentUnit.enchantPts": req.body.enchantPts}})
+            const units = await AddedArmy.updateMany({'enchantmentUnit.enchantId': detachmentId},
+                {$set: {"enchantmentUnit.name": req.body.name, "enchantmentUnit.enchantPts": req.body.enchantPts}})
 
 
             res.status(200).json({error: false, message: "Codex successfully update"})
 
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
     }
 
-    async editContentDetachment(req,res){
+    async editContentDetachment(req, res) {
         try {
 
             const {itemId, detachmentId, detachment} = req.body;
@@ -303,13 +336,13 @@ class Codexes {
             );
 
             res.status(200).json({error: false, message: "Codex successfully update"})
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
     }
 
-    async updateDetachmentTitle(req,res){
+    async updateDetachmentTitle(req, res) {
         try {
             const {itemId, detachmentId, title} = req.body;
 
@@ -334,7 +367,7 @@ class Codexes {
             );
 
             res.status(200).json({error: false, message: "Codex successfully update"})
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
@@ -367,7 +400,7 @@ class Codexes {
         }
     }
 
-    async deleteContentEnhancement(req,res){
+    async deleteContentEnhancement(req, res) {
         try {
 
             const {itemId, detachmentId} = req.body;
@@ -388,16 +421,44 @@ class Codexes {
 
             res.status(200).json({error: false, message: "Codex successfully delete"})
 
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
     }
 
-    async deleteDetachment(req,res){
+    async sharedSameCodex(req, res) {
+        try {
+            const {itemId, detachment} = req.body;
+
+            const result = await Codex.findOneAndUpdate(
+                {
+                    _id: req.params.id,
+                    'items._id': itemId,
+                },
+                {
+                    $push: {
+                        'items.$.detachments': detachment, // Удаляем правило по ID
+                    },
+                },
+                {
+                    new: true,
+                })
+
+
+            res.status(200).json({error: false, message: "Shared codex"})
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async deleteDetachment(req, res) {
         try {
 
-            const {itemId, detachmentId} = req.body;
+            const {itemId, detachmentId,codexId} = req.body;
+
 
             const result = await Codex.findOneAndUpdate(
                 {
@@ -407,7 +468,7 @@ class Codexes {
                 {
                     $pull: {
                         'items.$.detachments': {_id: detachmentId}, // Удаляем правило по ID
-                        'items.$.enhancements': { detachmentId: detachmentId }
+                        'items.$.enhancements': {detachmentId: detachmentId}
                     },
                 },
                 {
@@ -415,9 +476,67 @@ class Codexes {
                 })
 
 
+            const codex = await AddedUnits.find({detachment: detachmentId, shared: true,idCodex:codexId})
+
+            if (codex.length !== 0) {
+
+                const codexIds = codex.flatMap(e => String(e._id))
+
+                const units = await AddedArmy.updateMany(
+                    {codexId: {$in: codexIds}},
+                    {
+                        $set: {
+                            'enchantmentUnit.name': '',
+                            'enchantmentUnit.detachmentId': '',
+                            'enchantmentUnit.enchantPts': 0,
+                            'enchantmentUnit.enchantId': ''
+
+                        }
+                    })
+
+                const cod = await Codex.findOne({
+                    _id: req.params.id,
+                    'items._id': itemId,
+                }, {
+                    "items.$": 1  // Возвращает только совпавший элемент массива items
+                })
+
+                const detachIdNew = cod.items.map(e => {
+                    return e.detachments.length > 0 ? String(e.detachments[0]._id) : '';
+
+                    }
+                )
+
+                await AddedUnits.updateMany({_id:{$in:codexIds}},{$set:{detachment:detachIdNew[0]}})
+
+            }else{
+                const codexFree = await AddedUnits.find({detachment: detachmentId})
+
+                const codexFreeId = codexFree.flatMap(e => String(e._id))
+
+                const cod = await Codex.findOne({
+                    _id: req.params.id,
+                    'items._id': itemId,
+                }, {
+                    "items.$": 1  // Возвращает только совпавший элемент массива items
+                })
+
+
+                const detachIdNew = cod.items.map(e => {
+                        return e.detachments.length > 0 ? String(e.detachments[0]._id) : '';
+                    }
+                )
+
+                await AddedUnits.updateMany({_id:{$in:codexFreeId}},{$set:{detachment:detachIdNew[0]}})
+
+
+            }
+
+            // await AddedUnits.updateMany({detachment:detachmentId},{$set:{detachment:''}})
+
 
             res.status(200).json({error: false, message: "Detachment successfully delete"})
-        }catch (e) {
+        } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }

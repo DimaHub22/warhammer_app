@@ -37,7 +37,7 @@ class AddArmy {
                 categoryAllide,
                 sameCodex
             } = req.body
-
+            console.log(req.body)
             const unit = await new AddedArmy({
                 unitId,
                 codexId,
@@ -292,7 +292,6 @@ class AddArmy {
             
             const units = await AddedArmy.find({race: req.params.race, codexId: req.params.codexId})
 
-            console.log(units)
             const alliedUnits = await AddedArmy.find({
                 alliedUnits: req.params.race,
                 codexId: req.params.codexId

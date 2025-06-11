@@ -146,7 +146,14 @@ class Unit {
     async getUnitsOfCodex(req, res) {
         try {
 
-            const units = await Units.find({race: req.params.race})
+            // const units = await Units.find({race: req.params.race})
+            const units = await Units.find({
+                $or: [
+                    { race: req.params.race },               // Ищем по полю race
+                    { sameCodex: req.params.race }           // Ищем в массиве sameCodex
+                ]
+            });
+
             res.status(200).json(units)
 
         } catch (e) {
@@ -656,10 +663,10 @@ class Unit {
             ////////////////
 
             //Обновляем squad ////
-
+            console.log(originUnit)
             if (addedArmy.length !== 0) {
-                console.log(addedArmy)
-                console.log(originUnit)
+                // console.log(addedArmy)
+
 
 
                 const joinUnit = addedArmy.filter(e => e.join)
