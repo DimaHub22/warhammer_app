@@ -510,24 +510,59 @@ class Codexes {
                 await AddedUnits.updateMany({_id:{$in:codexIds}},{$set:{detachment:detachIdNew[0]}})
 
             }else{
+
                 const codexFree = await AddedUnits.find({detachment: detachmentId})
 
-                const codexFreeId = codexFree.flatMap(e => String(e._id))
+                // const codexFreeId = codexFree.flatMap(e => String(e._id))
+                // const idCodexOrigin = codexFree.flatMap(e => String(e.idCodex))
 
-                const cod = await Codex.findOne({
-                    _id: req.params.id,
-                    'items._id': itemId,
-                }, {
-                    "items.$": 1  // Возвращает только совпавший элемент массива items
-                })
+                ///////////////
 
-
-                const detachIdNew = cod.items.map(e => {
-                        return e.detachments.length > 0 ? String(e.detachments[0]._id) : '';
-                    }
+                const result = await Codex.updateMany(
+                    {
+                        'items.detachments._id': detachmentId,
+                    },
+                    { $pull: { "items.$.detachments": { _id: detachmentId }, 'items.$.enhancements': {detachmentId: detachmentId} } }
                 )
 
-                await AddedUnits.updateMany({_id:{$in:codexFreeId}},{$set:{detachment:detachIdNew[0]}})
+                // 2. Для каждой записи находим соответствующий кодекс
+                for (const unit of codexFree) {
+                    // 3. Находим кодекс по idCodex
+                    const codex = await Codex.findOne({
+                        "items._id": unit.idCodex
+                    });
+
+
+                    // 4. Находим нужный item в кодексе
+                    const item = codex.items.find(i => String(i._id) === unit.idCodex);
+
+                    // 5. Берем первый enhancements
+                    const firstEnhancementId = item.detachments[0]._id;
+
+                    // 6. Обновляем запись в AddedUnits
+                    await AddedUnits.updateOne(
+                        { _id: unit._id },
+                        { $set: { detachment: firstEnhancementId } }
+                    );
+                }
+                //////////////
+
+
+
+                // const cod = await Codex.findOne({
+                //     _id: req.params.id,
+                //     'items._id': itemId,
+                // }, {
+                //     "items.$": 1  // Возвращает только совпавший элемент массива items
+                // })
+
+
+                // const detachIdNew = cod.items.map(e => {
+                //         return e.detachments.length > 0 ? String(e.detachments[0]._id) : '';
+                //     }
+                // )
+
+                // await AddedUnits.updateMany({_id:{$in:codexFreeId}},{$set:{detachment:detachIdNew[0]}})
 
 
             }
