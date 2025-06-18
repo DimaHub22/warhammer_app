@@ -28,6 +28,7 @@ router.patch('/update-enchancement/:id',Unit.updateEnchancements)
 router.patch('/update-added-units/:id',Unit.updateAllAddedUnits)
 router.patch('/update-allide/:id',Unit.updateAlliedUnits)
 router.patch('/update-same/:id',Unit.updateSameCodex)
+router.post('/update-same-new',Unit.updateNewSameCodex)
 router.patch('/update-codex-same/:id',Unit.deleteUnitForSameCodex)
 router.patch('/update-codex-allied/:id',Unit.deleteUnitForAlliedUnits)
 

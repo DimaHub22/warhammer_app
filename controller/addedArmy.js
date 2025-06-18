@@ -35,9 +35,10 @@ class AddArmy {
                 secondName,
                 alliedUnits,
                 categoryAllide,
-                sameCodex
+                sameCodex,
+                originUnitId
             } = req.body
-            console.log(req.body)
+
             const unit = await new AddedArmy({
                 unitId,
                 codexId,
@@ -65,7 +66,8 @@ class AddArmy {
                 secondName,
                 alliedUnits,
                 categoryAllide,
-                sameCodex
+                sameCodex,
+                originUnitId
             })
 
 
@@ -110,7 +112,8 @@ class AddArmy {
                 secondName,
                 alliedUnits,
                 categoryAllide,
-                sameCodex
+                sameCodex,
+                originUnitId
             } = req.body.unit
 
             const unit = await new AddedArmy({
@@ -142,7 +145,8 @@ class AddArmy {
                 secondName,
                 alliedUnits,
                 categoryAllide,
-                sameCodex
+                sameCodex,
+                originUnitId
             })
 
             await unit.save()
@@ -211,6 +215,7 @@ class AddArmy {
                     attachTransport: item.attachTransport,
                     attachUnitsForTransport: item.attachUnitsForTransport,
                     attach: item.attach,
+                    originUnitId:item.originUnitId
                     // enchantmentUnit: {
                     //     name:item.enchantmentUnit.name,
                     //     detachmentId:item.enchantmentUnit.detachmentId,
@@ -304,7 +309,8 @@ class AddArmy {
                 // categoryAllide: req.params.race // Простая проверка наличия значения в массиве
             });
 
-            res.status(200).json([...units, ...alliedUnits,...sameCodexUnits])
+            // res.status(200).json([...units, ...alliedUnits,...sameCodexUnits])
+            res.status(200).json(units)
 
         } catch (e) {
             console.log(e)

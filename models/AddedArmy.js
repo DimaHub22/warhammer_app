@@ -59,7 +59,8 @@ const AddedArmy = new Schema({
     secondName:String,
     alliedUnits:[String],
     categoryAllide:String,
-    sameCodex:[String]
+    sameCodex:[String],
+    originUnitId:String
 
 })
 

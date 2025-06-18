@@ -64,7 +64,9 @@ const Unit = new Schema({
     enchancements:[String],
     alliedUnits:[String],
     categoryAllide:String,
-    sameCodex:[String]
+    sameCodex:[String],
+    sameUnit:{type:Boolean, default: false},
+    originUnitId:String
 
 
 })
