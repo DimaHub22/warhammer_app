@@ -1,7 +1,8 @@
 const Codex = require('../models/Codex')
 const AddedArmy = require('../models/AddedArmy')
 const AddedUnits = require('../models/AddedUnits')
-
+const SameCodex = require('../models/SameCodex')
+const Units = require('../models/Units')
 
 class Codexes {
     async createCodex(req, res) {
@@ -138,8 +139,32 @@ class Codexes {
         try {
 
             const codex = await Codex.findOne({'items._id': req.params.id}, {"items.$": 1})
-
             res.status(200).json(codex)
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async getEnchants(req, res) {
+        try {
+
+            const codex = await Codex.findOne({'items._id': req.params.id}, {"items.$": 1})
+            const detachId = codex.items.flatMap(e => e.detachments.flatMap(el => String(el._id)))
+
+            const enhancements = await Codex.aggregate([
+                // Разворачиваем массив items (если enhancements внутри items)
+                { $unwind: "$items" },
+                // Разворачиваем массив enhancements внутри items
+                { $unwind: "$items.enhancements" },
+                // Фильтруем enhancements по detachmentId
+                { $match: { "items.enhancements.detachmentId": { $in: detachId } } },
+                // Оставляем только enhancements (без вложенной структуры)
+                { $replaceRoot: { newRoot: "$items.enhancements" } }
+            ]);
+
+            res.status(200).json(enhancements)
 
         } catch (e) {
             console.log(e)
@@ -427,7 +452,7 @@ class Codexes {
         }
     }
 
-    async sharedSameCodex(req, res) {
+    async sharedSameCodexs(req, res) {
         try {
             const {itemId, detachment} = req.body;
 
@@ -454,11 +479,129 @@ class Codexes {
         }
     }
 
+    async sharedSameCodex(req, res) {
+        try {
+            const {detachId, value} = req.body;
+
+            if (value) {
+                const addDetach = await SameCodex.findOneAndUpdate(
+                    {},
+                    {$addToSet: {'sharedDetachments': detachId}},
+                    {
+                        upsert: true,  // Создать новый документ, если не найден
+                        new: true      // Вернуть обновленный/новый документ
+                    })
+            } else {
+                const deleteDetach = await SameCodex.findOneAndUpdate({},
+                    {$pull: {'sharedDetachments': detachId}},
+                )
+
+                const res1 = await Codex.aggregate([
+                    { $unwind: "$items" }, // Разворачиваем массив items
+                    { $unwind: "$items.enhancements" }, // Разворачиваем enhancements
+                    { $match: { "items.enhancements.detachmentId": detachId } }, // Фильтруем по detachmentId
+                    {
+                        $project: {
+                            codexId: "$items._id", // Сохраняем _id кодекса
+                            enhancementId: "$items.enhancements._id" // Также можно добавить _id enhancement
+                        }
+                    }
+                ]);
+
+                const codexId = [...new Set(res1.map(e => String(e.codexId)))]
+                const enchantId = res1.flatMap(e => String(e.enhancementId))
+
+
+                const units = await Units.updateMany({ race: { $ne: codexId[0] } },{$pull:{'enchancements':{$in:enchantId}}})
+
+                const result = await Codex.updateMany(
+                    {
+                        'items.detachments._id': detachId, 'items.detachments.shared': true
+                    },
+                    {
+                        $pull: {
+                            'items.$.detachments': {_id: detachId}, // Удаляем правило по ID
+                            // 'items.$.enhancements': {detachmentId: detachmentId}
+                        }
+                    }
+                )
+
+                const codexFree = await AddedUnits.find({detachment: detachId,shared:true})
+
+                if (codexFree.length !== 0) {
+
+                    const codexIds = codexFree.flatMap(e => String(e._id))
+
+                    const units = await AddedArmy.updateMany(
+                        {codexId: {$in: codexIds}},
+                        {
+                            $set: {
+                                'enchantmentUnit.name': '',
+                                'enchantmentUnit.detachmentId': '',
+                                'enchantmentUnit.enchantPts': 0,
+                                'enchantmentUnit.enchantId': ''
+
+                            }
+                        })
+
+                    // 2. Для каждой записи находим соответствующий кодекс
+                    for (const unit of codexFree) {
+                        // 3. Находим кодекс по idCodex
+                        const codex = await Codex.findOne({
+                            "items._id": unit.idCodex
+                        });
+
+                        // 4. Находим нужный item в кодексе
+                        const item = codex.items.find(i => String(i._id) === unit.idCodex);
+
+                        // 5. Берем первый enhancements
+                        const firstEnhancementId = item.detachments.length !== 0 ? item.detachments[0]._id : '';
+
+                        // 6. Обновляем запись в AddedUnits
+                        await AddedUnits.updateOne(
+                            {_id: unit._id},
+                            {$set: {detachment: firstEnhancementId}}
+                        );
+                    }
+
+
+                }
+
+
+            }
+
+
+            res.status(200).json({error: false, message: "Shared codex"})
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async getSharedSameCodex(req, res) {
+        try {
+
+            const sameCodex = await SameCodex.findOne();
+            res.status(200).json(sameCodex.sharedDetachments)
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
     async deleteDetachment(req, res) {
         try {
 
-            const {itemId, detachmentId,codexId} = req.body;
+            const {itemId, detachmentId, value, codexId} = req.body;
 
+            const enhancement = await Codex.findOne(
+                { "items.enhancements.detachmentId": detachmentId },
+                { "items.enhancements.$": 1 } // Проекция для точного совпадения
+            );
+
+            const enhancementId = String(enhancement?.items?.[0]?.enhancements?.[0]?._id);
 
             const result = await Codex.findOneAndUpdate(
                 {
@@ -475,46 +618,49 @@ class Codexes {
                     new: true,
                 })
 
+            if (value) {
 
-            const codex = await AddedUnits.find({detachment: detachmentId, shared: true,idCodex:codexId})
+                const codex = await AddedUnits.find({detachment: detachmentId, idCodex: codexId})
 
-            if (codex.length !== 0) {
+                const units = await Units.updateMany({ race: codexId },{$pull:{'enchancements':enhancementId}})
 
-                const codexIds = codex.flatMap(e => String(e._id))
 
-                const units = await AddedArmy.updateMany(
-                    {codexId: {$in: codexIds}},
-                    {
-                        $set: {
-                            'enchantmentUnit.name': '',
-                            'enchantmentUnit.detachmentId': '',
-                            'enchantmentUnit.enchantPts': 0,
-                            'enchantmentUnit.enchantId': ''
+                if (codex.length !== 0) {
 
-                        }
+                    const codexIds = codex.flatMap(e => String(e._id))
+
+                    const units = await AddedArmy.updateMany(
+                        {codexId: {$in: codexIds}},
+                        {
+                            $set: {
+                                'enchantmentUnit.name': '',
+                                'enchantmentUnit.detachmentId': '',
+                                'enchantmentUnit.enchantPts': 0,
+                                'enchantmentUnit.enchantId': ''
+
+                            }
+                        })
+
+                    const cod = await Codex.findOne({
+                        _id: req.params.id,
+                        'items._id': itemId,
+                    }, {
+                        "items.$": 1  // Возвращает только совпавший элемент массива items
                     })
 
-                const cod = await Codex.findOne({
-                    _id: req.params.id,
-                    'items._id': itemId,
-                }, {
-                    "items.$": 1  // Возвращает только совпавший элемент массива items
-                })
+                    const detachIdNew = cod.items.map(e => {
+                            return e.detachments.length > 0 ? String(e.detachments[0]._id) : '';
 
-                const detachIdNew = cod.items.map(e => {
-                    return e.detachments.length > 0 ? String(e.detachments[0]._id) : '';
+                        }
+                    )
 
-                    }
-                )
+                    await AddedUnits.updateMany({_id: {$in: codexIds}}, {$set: {detachment: detachIdNew[0]}})
 
-                await AddedUnits.updateMany({_id:{$in:codexIds}},{$set:{detachment:detachIdNew[0]}})
-
-            }else{
+                }
+            } else {
 
                 const codexFree = await AddedUnits.find({detachment: detachmentId})
 
-                // const codexFreeId = codexFree.flatMap(e => String(e._id))
-                // const idCodexOrigin = codexFree.flatMap(e => String(e.idCodex))
 
                 ///////////////
 
@@ -522,7 +668,16 @@ class Codexes {
                     {
                         'items.detachments._id': detachmentId,
                     },
-                    { $pull: { "items.$.detachments": { _id: detachmentId }, 'items.$.enhancements': {detachmentId: detachmentId} } }
+                    {
+                        $pull: {
+                            "items.$.detachments": {_id: detachmentId},
+                            'items.$.enhancements': {detachmentId: detachmentId}
+                        }
+                    }
+                )
+
+                const deleteDetach = await SameCodex.findOneAndUpdate({},
+                    {$pull: {'sharedDetachments': detachmentId}},
                 )
 
                 // 2. Для каждой записи находим соответствующий кодекс
@@ -532,7 +687,6 @@ class Codexes {
                         "items._id": unit.idCodex
                     });
 
-
                     // 4. Находим нужный item в кодексе
                     const item = codex.items.find(i => String(i._id) === unit.idCodex);
 
@@ -541,33 +695,13 @@ class Codexes {
 
                     // 6. Обновляем запись в AddedUnits
                     await AddedUnits.updateOne(
-                        { _id: unit._id },
-                        { $set: { detachment: firstEnhancementId } }
+                        {_id: unit._id},
+                        {$set: {detachment: firstEnhancementId}}
                     );
                 }
                 //////////////
 
-
-
-                // const cod = await Codex.findOne({
-                //     _id: req.params.id,
-                //     'items._id': itemId,
-                // }, {
-                //     "items.$": 1  // Возвращает только совпавший элемент массива items
-                // })
-
-
-                // const detachIdNew = cod.items.map(e => {
-                //         return e.detachments.length > 0 ? String(e.detachments[0]._id) : '';
-                //     }
-                // )
-
-                // await AddedUnits.updateMany({_id:{$in:codexFreeId}},{$set:{detachment:detachIdNew[0]}})
-
-
             }
-
-            // await AddedUnits.updateMany({detachment:detachmentId},{$set:{detachment:''}})
 
 
             res.status(200).json({error: false, message: "Detachment successfully delete"})

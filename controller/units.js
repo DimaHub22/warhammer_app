@@ -543,6 +543,7 @@ class Unit {
             await Units.findOneAndUpdate({_id: req.params.id},
                 {$set: {'enchancements': enchancements}})
 
+
             res.status(200).json({error: false, message: "Update enchancements"})
         } catch (e) {
             console.log(e)
@@ -618,7 +619,7 @@ class Unit {
                     moreLeader: [],
                     moreSecond: [],
                     attachTransport: [],
-                    // enchancements: [],
+                    enchancements: [],
                     canBeEmbarkedCount: {count: 0, checked: false},
                     sameUnit: true,
                     originUnitId: unit._id
@@ -1312,6 +1313,7 @@ class Unit {
                     description: originUnit.description,
                     // squad: originUnit.squad,
                     keywords: originUnit.keywords,
+                    // enchancements:originUnit.enchancements,
                     // count: originUnit.count,
                     // transportCount: originUnit.transportCount,
                     // attachTransport: originUnit.attachTransport,
@@ -1375,6 +1377,7 @@ class Unit {
             ///////
 
             if (armySame) {
+
                 let unit = {
                     // categoryId: req.body.categoryId,
                     originCategory: armySame.categoryId,
@@ -1399,8 +1402,7 @@ class Unit {
                     sameCodex: armySame.sameCodex
 
                 }
-                console.log(unit)
-                console.log(req.params.id)
+
                 await AddedArmy.updateMany(
                     {originUnitId: req.params.id},
                     {$set: unit},

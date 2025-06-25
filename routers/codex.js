@@ -6,10 +6,14 @@ const upload = require('../middleware/upload')
 
 router.get('/', Codex.getCodex)
 router.get('/:id', Codex.getCodexId)
+router.get('/added-shared/codex', Codex.getSharedSameCodex)
 router.get('/my-codex/:id', Codex.getCodexIdFromItems)
+router.get('/enchant-codex/:id', Codex.getEnchants)
 router.get('/my-enchants/:id', Codex.getCodexItems)
 
 router.get('/category/:id', Codex.getIdCodex)
+
+
 
 router.post('/create', Codex.createCodex)
 router.patch('/change/:id', Codex.categoryChange)
@@ -27,7 +31,8 @@ router.patch('/delete-choice-content/:id',Codex.deleteContent)
 router.patch('/delete-choice-detachment/:id',Codex.deleteDetachment)
 router.patch('/delete-choice-enhancement/:id',Codex.deleteContentEnhancement)
 
-router.patch('/shared-same-codex/:id',Codex.sharedSameCodex)
+router.patch('/shared-same-codex-choice/:id',Codex.sharedSameCodexs)
+router.patch('/shared-same-codex',Codex.sharedSameCodex)
 
 router.delete('/delete-codex/:id', Codex.deleteCodex)
 router.delete('/delete-category/:id', Codex.deleteCategory)
