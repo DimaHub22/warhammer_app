@@ -14,6 +14,7 @@ router.patch('/add-leader-second/:id', Squad.updateLeaderForSecondLeader)
 router.patch('/add/leader-second/:id', Squad.updateArrLeaderForSecondLeader)
 
 router.patch('/add-transport/:id', Squad.updateUnitForTransport)
+router.patch('/add-transport-unit/:id',Squad.updateTransportForUnit)
 router.patch('/add-transport/new-unit/:id', Squad.updateTransportNewUnit)
 router.patch('/attach/:id', Squad.attachUnit)
 router.patch('/attach/transport/:id', Squad.attachUnitTransport)

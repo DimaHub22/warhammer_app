@@ -2,6 +2,7 @@ const Squad = require('../models/Squad')
 const Units = require('../models/Units')
 const AddedArmy = require('../models/AddedArmy')
 const AddedUnits = require('../models/AddedUnits')
+
 class Squads {
 
     async createSquad(req, res) {
@@ -87,13 +88,21 @@ class Squads {
             res.status(400).json({error: true, message: "Error service"})
         }
     }
+
     async attachUnitTransport(req, res) {
         try {
+
+            const transport = await Units.findOne({_id: req.params.id})
 
             await Units.findOneAndUpdate(
                 {_id: req.params.id},
                 {$set: req.body}
             )
+
+            await Units.updateMany({_id: {$in: req.body.attachUnitTransport}}, {$addToSet: {'attachTransport': transport._id}})
+
+            await AddedArmy.updateMany({unitId: {$in: req.body.attachUnitTransport}}, {$addToSet: {'attachTransport': transport._id}})
+
 
             res.status(200).json({error: false, message: "Added unit"})
         } catch (e) {
@@ -118,13 +127,13 @@ class Squads {
                         {$push: {'leader': leader}}
                     )
                 }
-                res.status(200).json({ error: false, message: "Leader added successfully" });
-            } else{
+                res.status(200).json({error: false, message: "Leader added successfully"});
+            } else {
                 await Units.updateOne(
                     {_id: req.params.id},
                     {$pull: {'leader': leader}}
                 )
-                res.status(200).json({ error: false, message: "Leader removed successfully" });
+                res.status(200).json({error: false, message: "Leader removed successfully"});
             }
 
             // res.status(200).json({error: false, message: "Added leader"})
@@ -138,25 +147,25 @@ class Squads {
     async updateSecondLeaderForLeader(req, res) {
         try {
 
-            const {add, leader} = req.body
+            const {second} = req.body
 
-            const unit = await Units.findOne({_id: req.params.id})
+            await Units.findOneAndUpdate({_id: second}, {$pull: {'moreLeader': req.params.id}})
 
-            if (add) {
-                if (!unit.leader.includes(leader)) {
-                    await Units.updateOne(
-                        {_id: req.params.id},
-                        {$push: {'moreLeader': leader}}
-                    )
-                }
-            } else {
-                await Units.updateOne(
-                    {_id: req.params.id},
-                    {$pull: {'moreLeader': leader}}
-                )
-            }
+            // if (add) {
+            //     if (!unit.leader.includes(leader)) {
+            //         await Units.updateOne(
+            //             {_id: req.params.id},
+            //             {$push: {'moreLeader': leader}}
+            //         )
+            //     }
+            // } else {
+            //     await Units.updateOne(
+            //         {_id: req.params.id},
+            //         {$pull: {'moreLeader': leader}}
+            //     )
+            // }
 
-            res.status(200).json({error: false, message: "Added leader"})
+            res.status(200).json({error: false, message: "Update leader"})
         } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
@@ -166,12 +175,22 @@ class Squads {
     async updateArrSecondLeaderForLeader(req, res) {
         try {
 
-            const {units} = req.body
+            const {units,ststus} = req.body
+
+            const second = await Units.findOne({_id: req.params.id})
 
             await Units.updateOne(
                 {_id: req.params.id},
                 {$set: {'moreLeader': units}}
             )
+
+            if(!ststus){
+                await Units.updateMany({_id: {$in: units}}, {$addToSet: {'moreSecond': second._id}})
+            }else{
+                await Units.updateMany({_id: {$in: units}}, {$addToSet: {'moreLeader': second._id}})
+            }
+            // await Units.updateMany({_id: {$in: units}}, {$addToSet: {'moreSecond': second._id}})
+
 
             res.status(200).json({error: false, message: "Added leader"})
 
@@ -184,23 +203,31 @@ class Squads {
     async updateLeaderForSecondLeader(req, res) {
         try {
 
-            const {add, leader} = req.body
+            const {leader,status} = req.body
 
-            const unit = await Units.findOne({_id: req.params.id})
-
-            if (add) {
-                if (!unit.leader.includes(leader)) {
-                    await Units.updateOne(
-                        {_id: req.params.id},
-                        {$push: {'moreSecond': leader}}
-                    )
-                }
-            } else {
-                await Units.updateOne(
-                    {_id: req.params.id},
-                    {$pull: {'moreSecond': leader}}
-                )
+            if(!status){
+                await Units.findOneAndUpdate({_id: leader}, {$pull: {'moreSecond': req.params.id}})
+            }else{
+                await Units.findOneAndUpdate({_id: leader}, {$pull: {'moreLeader': req.params.id}})
             }
+
+            // await Units.findOneAndUpdate({_id: leader}, {$pull: {'moreSecond': req.params.id}})
+
+            // const unit = await Units.findOne({_id: req.params.id})
+            //
+            // if (add) {
+            //     if (!unit.leader.includes(leader)) {
+            //         await Units.updateOne(
+            //             {_id: req.params.id},
+            //             {$push: {'moreSecond': leader}}
+            //         )
+            //     }
+            // } else {
+            //     await Units.updateOne(
+            //         {_id: req.params.id},
+            //         {$pull: {'moreSecond': leader}}
+            //     )
+            // }
 
             res.status(200).json({error: false, message: "Added leader"})
         } catch (e) {
@@ -214,10 +241,14 @@ class Squads {
 
             const {units} = req.body
 
+            const leader = await Units.findOne({_id: req.params.id})
+
             await Units.updateOne(
                 {_id: req.params.id},
                 {$set: {'moreSecond': units}}
             )
+
+            await Units.updateMany({_id: {$in: units}}, {$addToSet: {'moreLeader': leader._id}})
 
             res.status(200).json({error: false, message: "Added leader"})
 
@@ -231,23 +262,73 @@ class Squads {
     async updateUnitForTransport(req, res) {
         try {
 
-            const {add, leader} = req.body
+            const {unit} = req.body
 
-            const unit = await Units.findOne({_id: req.params.id})
+            await Units.findOneAndUpdate({_id: unit}, {$pull: {'attachTransport': req.params.id}})
+            // console.log(unit)
 
-            if (add) {
-                if (!unit.leader.includes(leader)) {
-                    await Units.updateOne(
-                        {_id: req.params.id},
-                        {$push: {'attachTransport': leader}}
-                    )
-                }
-            } else {
-                await Units.updateOne(
-                    {_id: req.params.id},
-                    {$pull: {'attachTransport': leader}}
-                )
+            await AddedArmy.updateMany({unitId: unit}, {$pull: {'attachTransport': req.params.id}})
+            // const unit = await Units.findOne({_id: req.params.id})
+            //
+            // if (add) {
+            //     if (!unit.leader.includes(leader)) {
+            //         await Units.updateOne(
+            //             {_id: req.params.id},
+            //             {$push: {'attachTransport': leader}}
+            //         )
+            //     }
+            // } else {
+            //     await Units.updateOne(
+            //         {_id: req.params.id},
+            //         {$pull: {'attachTransport': leader}}
+            //     )
+            // }
+
+            res.status(200).json({error: false, message: "Added leader"})
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async updateTransportForUnit(req, res) {
+        try {
+            const {unit} = req.body
+
+          const unitAdded =  await AddedArmy.find({unitId: req.params.id})
+
+            const unitAddedIds = unitAdded.flatMap(e => e._id)
+
+            const transports = await AddedArmy.find({
+                unitId: unit,
+                attachUnitsForTransport: {$in : unitAddedIds } // автоматически проверяет вхождение в массив
+            });
+
+            if(transports.length !== 0){
+
+                const transportIds = transports.flatMap(e => e._id)
+
+                await AddedArmy.updateMany(
+                    {_id: {$in: transportIds}},
+                    [
+                        {
+                            $set: {
+                                join: false,
+                                embark: false,
+                                attachUnitsForTransport: [],
+                                count: 0,
+                                categoryId: "$originCategory"
+                            }
+                        }
+                    ]
+                );
+
             }
+
+            await Units.findOneAndUpdate({_id: unit}, {$pull: {'attachUnitTransport': req.params.id}})
+
+            await AddedArmy.updateMany({unitId: unit}, {$pull: {'attachUnitTransport': req.params.id}})
+
 
             res.status(200).json({error: false, message: "Added leader"})
         } catch (e) {
@@ -270,6 +351,10 @@ class Squads {
                 {$set: {'attachTransport': req.body.attachTransport}}
             )
 
+            await Units.updateMany({_id: {$in: req.body.attachTransport}}, {$addToSet: {'attachUnitTransport': unit._id}})
+
+            await AddedArmy.updateMany({unitId: {$in: req.body.attachTransport}}, {$addToSet: {'attachUnitTransport': unit._id}})
+
             res.status(200).json({error: false, message: "Added unit"})
         } catch (e) {
             console.log(e)
@@ -278,25 +363,29 @@ class Squads {
     }
 
 
-    async resetApp(req,res){
-        try {
-
-            await Units.updateMany(
-                {},
-                {$set:{"pts": 0, "squad":[],'canBeEmbarkedCount.count':0,'canBeEmbarkedCount.checked': false,
-                        "transportCount": 0, "attach": [], "ptsForModel": [], "moreSecond": [],"attachTransport": [],
-                        "leader": [], "moreLeader":[],"attachUnitTransport":[] }}
-            )
-
-            await AddedArmy.deleteMany({})
-            await AddedUnits.deleteMany({})
-
-
-            res.status(200).json({error: false, message: "Successful app reset"})
-        }catch (e) {
-            console.log(e)
-            res.status(400).json({error: true, message: "Error service"})
-        }
+    async resetApp(req, res) {
+        // try {
+        //
+        //     await Units.updateMany(
+        //         {},
+        //         {
+        //             $set: {
+        //                 "pts": 0, "squad": [], 'canBeEmbarkedCount.count': 0, 'canBeEmbarkedCount.checked': false,
+        //                 "transportCount": 0, "attach": [], "ptsForModel": [], "moreSecond": [], "attachTransport": [],
+        //                 "leader": [], "moreLeader": [], "attachUnitTransport": []
+        //             }
+        //         }
+        //     )
+        //
+        //     await AddedArmy.deleteMany({})
+        //     await AddedUnits.deleteMany({})
+        //
+        //
+        //     res.status(200).json({error: false, message: "Successful app reset"})
+        // } catch (e) {
+        //     console.log(e)
+        //     res.status(400).json({error: true, message: "Error service"})
+        // }
     }
 }
 

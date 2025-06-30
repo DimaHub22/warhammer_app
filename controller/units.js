@@ -232,9 +232,22 @@ class Unit {
     async deleteUnit(req, res) {
         try {
 
-            const unit = await Units.findOne({_id: req.params.id})
+            // const unit = await Units.findOne({_id: req.params.id})
 
-            const addedArmy = await AddedArmy.find({unitId: req.params.id})
+            const unit = await Units.find({
+                $or: [
+                    { _id: req.params.id },
+                    { originUnitId: req.params.id }
+                ]
+            })
+
+            // const addedArmy = await AddedArmy.find({unitId: req.params.id})
+            const addedArmy = await AddedArmy.find({
+                $or: [
+                    { unitId: req.params.id },
+                    { originUnitId: req.params.id }
+                ]
+            });
 
             if (addedArmy.length !== 0) {
                 const unitJoin = addedArmy.filter(e => e.join)
@@ -427,24 +440,29 @@ class Unit {
                 }
             }
 
-            if (unit) {
-                const imageName = unit.image.replace(/uploads/g, '').slice(1)
+            if (unit.length !== 0) {
 
-                fs.access(`${imageName}`, async function (error) {
+                const unitsId = unit.flatMap(e => e._id)
 
-                    if (error) {
+                await Units.deleteMany({_id: {$in:unitsId}})
 
-                        console.log("Файл не найден");
-                        await Units.deleteOne({_id: req.params.id})
+                // const imageName = unit.image.replace(/uploads/g, '').slice(1)
+                //
+                // fs.access(`${imageName}`, async function (error) {
+                //
+                //     if (error) {
+                //
+                //         console.log("Файл не найден");
+                //         await Units.deleteOne({_id: req.params.id})
+                //
+                //     } else {
+                //         await fsPromises.rm(`./${unit.image}`);
+                //         await Units.deleteOne({_id: req.params.id})
+                //         console.log("Файл найден");
 
-                    } else {
-                        await fsPromises.rm(`./${unit.image}`);
-                        await Units.deleteOne({_id: req.params.id})
-                        console.log("Файл найден");
+                    // }
 
-                    }
-
-                });
+                // });
 
 
             }
@@ -620,6 +638,7 @@ class Unit {
                     moreSecond: [],
                     attachTransport: [],
                     enchancements: [],
+                    attachUnitTransport:[],
                     canBeEmbarkedCount: {count: 0, checked: false},
                     sameUnit: true,
                     originUnitId: unit._id
@@ -1291,6 +1310,15 @@ class Unit {
             const originUnit = await Units.findOne({_id: req.params.id})
             const addedArmy = await AddedArmy.find({unitId: req.params.id})
 
+            // const addedArmy = await AddedArmy.find({
+            //     unitId: req.params.id,
+            //     $or: [
+            //         { originUnitId: { $exists: false } }, // Нет свойства
+            //         { originUnitId: '' },                 // Пустая строка
+            //         { originUnitId: null }                // Явное значение null (если нужно)
+            //     ]
+            // });
+
 
             const unitFreePts = []
 
@@ -1646,6 +1674,7 @@ class Unit {
 
                     const transportAttachUnits = joinUnit.filter(e => e.attachUnitsForTransport.length !== 0 && e.position === 1)
                     if (transportAttachUnits.length !== 0) {
+
                         console.log('transportAttachUnits')
                         const attachId = transportAttachUnits.flatMap(e => e.attachUnitsForTransport)
 
@@ -2003,6 +2032,7 @@ class Unit {
 
             async function validateAndFixTransports(transportAttachUnits) {
                 console.log('validateAndFixTransports ее')
+                console.log(transportAttachUnits)
                 const validTransports = await Promise.all(
                     transportAttachUnits.map(async t => {
 
@@ -2052,6 +2082,7 @@ class Unit {
 
             async function removeOverfilledTransports(transportAttachUnits) {
                 console.log('removeOverfilledTransports')
+
                 const validTransports = await Promise.all(
                     transportAttachUnits.map(async t => {
 
