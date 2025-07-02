@@ -69,6 +69,14 @@ class Codexes {
                     }
                 })
 
+            const addedCodex = await AddedUnits.updateMany(
+                {idCodex: req.params.id},
+                {$set :{
+                        name: req.body.name,
+                        image: req.file ? req.file.path : codex.items[0].image
+                    }})
+            console.log(addedCodex)
+
             res.status(201).json({error: false, message: "Codex successfully created"})
 
         } catch (e) {

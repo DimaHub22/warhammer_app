@@ -79,7 +79,9 @@ class AddUnit {
                         alliedUnits:item.alliedUnits,
                         categoryAllide:item.categoryAllide,
                         sameCodex:item.sameCodex,
-                        originUnitId:item.originUnitId
+                        originUnitId:item.originUnitId,
+                        sameUnit:item.sameUnit,
+                        allideUnit:item.allideUnit,
                         // lastId: item._id
                     }
                     newCodex2.push(newUnits)

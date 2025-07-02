@@ -36,7 +36,9 @@ class AddArmy {
                 alliedUnits,
                 categoryAllide,
                 sameCodex,
-                originUnitId
+                originUnitId,
+                sameUnit,
+                allideUnit,
             } = req.body
 
             const unit = await new AddedArmy({
@@ -67,7 +69,9 @@ class AddArmy {
                 alliedUnits,
                 categoryAllide,
                 sameCodex,
-                originUnitId
+                originUnitId,
+                sameUnit,
+                allideUnit,
             })
 
 
@@ -113,7 +117,9 @@ class AddArmy {
                 alliedUnits,
                 categoryAllide,
                 sameCodex,
-                originUnitId
+                originUnitId,
+                sameUnit,
+                allideUnit,
             } = req.body.unit
 
             const unit = await new AddedArmy({
@@ -146,7 +152,9 @@ class AddArmy {
                 alliedUnits,
                 categoryAllide,
                 sameCodex,
-                originUnitId
+                originUnitId,
+                sameUnit,
+                allideUnit,
             })
 
             await unit.save()
@@ -215,7 +223,9 @@ class AddArmy {
                     attachTransport: item.attachTransport,
                     attachUnitsForTransport: item.attachUnitsForTransport,
                     attach: item.attach,
-                    originUnitId:item.originUnitId
+                    originUnitId:item.originUnitId,
+                    sameUnit:item.sameUnit,
+                    allideUnit:item.allideUnit,
                     // enchantmentUnit: {
                     //     name:item.enchantmentUnit.name,
                     //     detachmentId:item.enchantmentUnit.detachmentId,

@@ -66,6 +66,7 @@ const Unit = new Schema({
     categoryAllide:String,
     sameCodex:[String],
     sameUnit:{type:Boolean, default: false},
+    allideUnit:{type:Boolean, default: false},
     originUnitId:String
 
 
