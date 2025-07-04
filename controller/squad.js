@@ -93,7 +93,7 @@ class Squads {
         try {
 
             const transport = await Units.findOne({_id: req.params.id})
-
+            console.log(req.body)
             await Units.findOneAndUpdate(
                 {_id: req.params.id},
                 {$set: req.body}
@@ -175,21 +175,58 @@ class Squads {
     async updateArrSecondLeaderForLeader(req, res) {
         try {
 
-            const {units,ststus} = req.body
+            const {units, ststus, squadChoiceValue, squadChoiceSquadId} = req.body
 
             const second = await Units.findOne({_id: req.params.id})
 
-            await Units.updateOne(
+
+            await Units.findOneAndUpdate(
                 {_id: req.params.id},
-                {$set: {'moreLeader': units}}
+                {$set: {'moreLeader': units}},
+                {new: true}
             )
 
-            if(!ststus){
-                await Units.updateMany({_id: {$in: units}}, {$addToSet: {'moreSecond': second._id}})
-            }else{
-                await Units.updateMany({_id: {$in: units}}, {$addToSet: {'moreLeader': second._id}})
+            const squads = await Squad.findOne({squad: '2nd Leader'})
+
+            const secondUp = await Units.find({
+                _id: {$in: units},
+                squad: String(squads._id)  // Проверяем, есть ли такой ID в squad
+            });
+
+            if (secondUp.length !== 0) {
+
+                const secondsId = secondUp.flatMap(e => e._id)
+
+                if (!ststus) {
+                    await Units.updateMany({_id: {$in: units}}, {$addToSet: {'moreSecond': second._id}})
+                } else {
+                    await Units.updateMany({_id: {$in: secondsId}}, {$addToSet: {'moreLeader': second._id}})
+                }
+
+            } else {
+                console.log('Ne secondUp')
+                console.log(ststus)
+                console.log(units)
+                console.log(secondUp)
+                const secondUp2 = await Units.find({
+                    _id: {$in: units},
+                    squad: String(squads._id)  // Проверяем, есть ли такой ID в squad
+                });
+
+                if (secondUp2.length !== 0) {
+
+                    const secondsId = secondUp2.flatMap(e => e._id)
+
+                    if (!ststus) {
+                        await Units.updateMany({_id: {$in: units}}, {$addToSet: {'moreSecond': second._id}})
+                    } else {
+                        await Units.updateMany({_id: {$in: secondsId}}, {$addToSet: {'moreLeader': second._id}})
+                    }
+
+                }
+
+
             }
-            // await Units.updateMany({_id: {$in: units}}, {$addToSet: {'moreSecond': second._id}})
 
 
             res.status(200).json({error: false, message: "Added leader"})
@@ -200,14 +237,230 @@ class Squads {
         }
     }
 
+    async updateSecondForCheckedFree(req, res) {
+        try {
+            const {squadChoiceSquadId} = req.body
+
+            const second = await Units.findOne({_id: req.params.id})
+
+            const moreLeader = second.moreLeader
+            const attach = second.attach
+            const attachTransport = second.attachTransport
+            // canBeEmbarkedCount
+
+
+            await Units.bulkWrite([
+                {
+                    updateMany: {
+                        filter: {_id: {$in: moreLeader}},
+                        update: {
+                            $pull: {
+                                moreSecond: req.params.id,
+                                moreLeader: req.params.id
+                            }
+                        }
+                    }
+                },
+                {
+                    updateMany: {
+                        filter: {_id: {$in: attach}},
+                        update: {
+                            $pull: {leader: req.params.id}
+                        }
+                    }
+                },
+                {
+                    updateMany: {
+                        filter: {_id: {$in: attachTransport}},
+                        update: {
+                            $pull: {
+                                attachUnitTransport: req.params.id,
+                            }
+                        }
+                    }
+                },
+            ]);
+
+
+            const unit = await Units.findOneAndUpdate(
+                {_id: req.params.id},
+                {
+                    $set: {
+                        'moreLeader': [],
+                        'attachTransport': [],
+                        // 'squad': [] ,
+                        'attach': [],
+                        // 'canBeEmbarkedCount.count':0,
+                        // 'canBeEmbarkedCount.checked':false
+                    },
+                    $pull: {squad: squadChoiceSquadId}
+                },
+                {new: true}
+            )
+
+            res.status(200).json(unit)
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async updateSecondForCheckedSecond(req, res) {
+        try {
+
+            const {squadChoiceSquadId} = req.body
+
+            //////////// Ищим сквад лидера
+            const squads = await Squad.findOne({squad: 'Leader'})
+
+            const secondUp = await Units.findOne({
+                _id: req.params.id,
+                squad: String(squads._id) // Проверяем, есть ли такой ID в squad
+            });
+
+            let unit;
+
+            if (secondUp) {
+                const moreSecond = secondUp.moreSecond
+                const attach = secondUp.attach
+                const attachTransport = secondUp.attachTransport
+
+                // if(moreSecond.length !== 0 || attach.length !== 0 || attachTransport.length !== 0){
+
+                await Units.bulkWrite([
+                    {
+                        updateMany: {
+                            filter: {_id: {$in: moreSecond}},
+                            update: {
+                                $pull: {
+                                    moreLeader: req.params.id
+                                }
+                            }
+                        }
+                    },
+                    {
+                        updateMany: {
+                            filter: {_id: {$in: attach}},
+                            update: {
+                                $pull: {leader: req.params.id}
+                            }
+                        }
+                    },
+                    {
+                        updateMany: {
+                            filter: {_id: {$in: attachTransport}},
+                            update: {
+                                $pull: {
+                                    attachUnitTransport: req.params.id,
+                                }
+                            }
+                        }
+                    },
+                ]);
+
+                unit = await Units.findOneAndUpdate(
+                    {_id: req.params.id},
+                    {
+                        $set: {'moreSecond': [], 'attach': []},
+                        $push: {squad: squadChoiceSquadId}
+                    },
+                    {new: true}
+                )
+
+                // if(unit){
+                //     res.status(200).json(unit)
+                // }
+
+                // }
+
+            } else {
+                // res.status(200).json({error: false, message: "Added leader"})
+            }
+
+
+            res.status(200).json(unit)
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async updateSecondForChecked2ndTo2nd(req, res) {
+        try {
+
+            const squads = await Squad.findOne({squad: '2nd Leader'})
+
+            const second = await Units.findOne({_id: req.params.id})
+
+            const moreLeader = second.moreLeader
+
+            const units = await Units.find({_id: {$in: moreLeader}, squad: squads._id})
+
+            let unit;
+
+            if (units.length !== 0) {
+
+                const unitIds = units.flatMap(e => String(e._id))
+
+                await Units.bulkWrite([
+                    {
+                        updateMany: {
+                            filter: {_id: {$in: unitIds}},
+                            update: {
+                                $pull: {
+                                    moreLeader: req.params.id
+                                }
+                            }
+                        }
+                    },
+                    // {
+                    //     updateMany: {
+                    //         filter: { _id: { $in: attach } },
+                    //         update: {
+                    //             $pull: { leader: req.params.id }
+                    //         }
+                    //     }
+                    // },
+                    // {
+                    //     updateMany: {
+                    //         filter: { _id: { $in: attachTransport } },
+                    //         update: {
+                    //             $pull: {
+                    //                 attachUnitTransport: req.params.id,
+                    //             }
+                    //         }
+                    //     }
+                    // },
+                ]);
+
+                unit = await Units.findOneAndUpdate(
+                    {_id: req.params.id},
+                    {
+                        $pull: {moreLeader: {$in: unitIds}}
+                    },
+                    {new: true}
+                )
+
+            }
+
+            res.status(200).json(unit)
+            // res.status(200).json({error: false, message: "Added leader"})
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
     async updateLeaderForSecondLeader(req, res) {
         try {
 
-            const {leader,status} = req.body
+            const {leader, status} = req.body
 
-            if(!status){
+            if (!status) {
                 await Units.findOneAndUpdate({_id: leader}, {$pull: {'moreSecond': req.params.id}})
-            }else{
+            } else {
                 await Units.findOneAndUpdate({_id: leader}, {$pull: {'moreLeader': req.params.id}})
             }
 
@@ -239,7 +492,7 @@ class Squads {
     async updateArrLeaderForSecondLeader(req, res) {
         try {
 
-            const {units} = req.body
+            const {units, ststus} = req.body
 
             const leader = await Units.findOne({_id: req.params.id})
 
@@ -258,6 +511,254 @@ class Squads {
         }
     }
 
+    async updateLeaderForCheckedFree(req, res) {
+        try {
+
+            const leader = await Units.findOne({_id: req.params.id})
+
+            const moreSecond = leader.moreSecond
+            const moreLeader = leader.moreLeader
+            const attach = leader.attach
+            const attachTransport = leader.attachTransport
+
+
+            await Units.bulkWrite([
+                {
+                    updateMany: {
+                        filter: {_id: {$in: moreSecond}},
+                        update: {
+                            $pull: {
+                                moreLeader: req.params.id,
+                                // moreSecond:req.params.id
+                            }
+                        }
+                    }
+                },
+                {
+                    updateMany: {
+                        filter: {_id: {$in: moreLeader}},
+                        update: {
+                            $pull: {
+                                // moreLeader: req.params.id,
+                                moreSecond: req.params.id
+                            }
+                        }
+                    }
+                },
+                {
+                    updateMany: {
+                        filter: {_id: {$in: attach}},
+                        update: {
+                            $pull: {
+                                leader: req.params.id,
+                            }
+                        }
+                    }
+                },
+                {
+                    updateMany: {
+                        filter: {_id: {$in: attachTransport}},
+                        update: {
+                            $pull: {
+                                attachUnitTransport: req.params.id,
+                            }
+                        }
+                    }
+                },
+            ]);
+
+
+            // await Units.updateMany({_id:{$in:attachTransport}},{$pull:{'attachUnitTransport':req.params.id}})
+
+            const unit = await Units.findOneAndUpdate(
+                {_id: req.params.id},
+                {
+                    $set: {
+                        'moreSecond': [],
+                        'moreLeader': [],
+                        'attachTransport': [],
+                        'squad': [],
+                        'attach': [],
+                        'canBeEmbarkedCount.count': 0,
+                        'canBeEmbarkedCount.checked': false
+                    }
+                },
+                {new: true}
+            )
+
+            res.status(200).json(unit)
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async updateAttachForCheckedFree(req, res) {
+        try {
+            const {squadChoiceSquadId} = req.body
+
+            const attach = await Units.findOne({_id: req.params.id})
+
+            const leader = attach.leader
+            const attachTransport = attach.attachTransport
+
+
+            await Units.bulkWrite([
+                {
+                    updateMany: {
+                        filter: {_id: {$in: leader}},
+                        update: {
+                            $pull: {
+                                attach: req.params.id,
+                            }
+                        }
+                    }
+                },
+                {
+                    updateMany: {
+                        filter: {_id: {$in: attachTransport}},
+                        update: {
+                            $pull: {
+                                attachUnitTransport: req.params.id,
+                            }
+                        }
+                    }
+                },
+            ]);
+
+
+            const unit = await Units.findOneAndUpdate(
+                {_id: req.params.id},
+                {
+                    $set: {
+                        'leader': [],
+                        'attachTransport': [],
+                        'squad': [],
+                        // 'attach': [],
+                        'canBeEmbarkedCount.count': 0,
+                        'canBeEmbarkedCount.checked': false
+                    },
+                },
+                {new: true}
+            )
+
+            res.status(200).json(unit)
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async updateCanBeEmbarkedForCheckedFree(req, res) {
+        try {
+
+            const {squadChoiceSquadId} = req.body
+
+
+            const unitChoice = await Units.findOne({_id: req.params.id})
+
+            const attachTransport = unitChoice.attachTransport
+
+            let unit;
+
+            if (attachTransport.length !== 0) {
+                await Units.bulkWrite([
+                    {
+                        updateMany: {
+                            filter: {_id: {$in: attachTransport}},
+                            update: {
+                                $pull: {
+                                    attachUnitTransport: req.params.id,
+                                }
+                            }
+                        }
+                    },
+                ]);
+
+                //
+                unit = await Units.findOneAndUpdate(
+                    {_id: req.params.id},
+                    {
+                        $set: {
+                            'attachTransport': [],
+                            // 'squad': [] ,
+                            // 'attach': [],
+                            'canBeEmbarkedCount.count': 0,
+                            'canBeEmbarkedCount.checked': false
+                        },
+                        $pull: {squad: squadChoiceSquadId}
+                    },
+                    {new: true}
+                )
+            }
+
+
+            //
+            res.status(200).json(unit)
+            // res.status(200).json({error: false, message: "AttachTransport"})
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async updateTransportForCheckedFree(req, res) {
+        try {
+            const {squadChoiceSquadId} = req.body
+
+            const transport = await Units.findOne({_id: req.params.id})
+
+            const attachUnitTransport = transport.attachUnitTransport
+
+
+            await Units.bulkWrite([
+                {
+                    updateMany: {
+                        filter: {_id: {$in: attachUnitTransport}},
+                        update: {
+                            $pull: {
+                                attachTransport: req.params.id,
+                            }
+                        }
+                    }
+                },
+                // {
+                //     updateMany: {
+                //         filter: { _id: { $in: attachTransport } },
+                //         update: {
+                //             $pull: {
+                //                 attachUnitTransport: req.params.id,
+                //             }
+                //         }
+                //     }
+                // },
+            ]);
+
+
+            const unit = await Units.findOneAndUpdate(
+                {_id: req.params.id},
+                {
+                    $set: {
+                        'transportCount': 0,
+                        'attachUnitTransport': [],
+                        'squad': [],
+                        // 'attach': [],
+                        // 'canBeEmbarkedCount.count':0,
+                        // 'canBeEmbarkedCount.checked':false
+                    },
+                },
+                {new: true}
+            )
+
+            res.status(200).json(unit)
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
 
     async updateUnitForTransport(req, res) {
         try {
@@ -268,6 +769,7 @@ class Squads {
             // console.log(unit)
 
             await AddedArmy.updateMany({unitId: unit}, {$pull: {'attachTransport': req.params.id}})
+
             // const unit = await Units.findOne({_id: req.params.id})
             //
             // if (add) {
@@ -295,16 +797,16 @@ class Squads {
         try {
             const {unit} = req.body
 
-          const unitAdded =  await AddedArmy.find({unitId: req.params.id})
+            const unitAdded = await AddedArmy.find({unitId: req.params.id})
 
             const unitAddedIds = unitAdded.flatMap(e => e._id)
 
             const transports = await AddedArmy.find({
                 unitId: unit,
-                attachUnitsForTransport: {$in : unitAddedIds } // автоматически проверяет вхождение в массив
+                attachUnitsForTransport: {$in: unitAddedIds} // автоматически проверяет вхождение в массив
             });
 
-            if(transports.length !== 0){
+            if (transports.length !== 0) {
 
                 const transportIds = transports.flatMap(e => e._id)
 

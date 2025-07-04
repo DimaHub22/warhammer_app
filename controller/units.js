@@ -1977,7 +1977,7 @@ class Unit {
             const unitFreePts = []
 /////////// SAME Units ////////////////
             const sameUnits = await Units.find({originUnitId: req.params.id,sameUnit:true})
-
+            console.log(sameUnits)
             if (sameUnits.length !== 0) {
                 let unit = {
                     categoryId: originUnit.categoryId,
@@ -2092,7 +2092,6 @@ class Unit {
                     sameCodex: originUnit.sameCodex
 
                 }
-
                 await AddedArmy.updateMany(
                     {unitId: req.params.id},
                     {$set: unit},
