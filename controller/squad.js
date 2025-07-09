@@ -93,7 +93,6 @@ class Squads {
         try {
 
             const transport = await Units.findOne({_id: req.params.id})
-            console.log(req.body)
             await Units.findOneAndUpdate(
                 {_id: req.params.id},
                 {$set: req.body}
@@ -186,45 +185,41 @@ class Squads {
                 {new: true}
             )
 
-            const squads = await Squad.findOne({squad: '2nd Leader'})
+            const squadsAll = await Squad.find()
+            const leader = squadsAll.find(e => e.squad === 'Leader')
+            const secondLeader = squadsAll.find(e => e.squad === '2nd Leader')
+
+
+            const lesderUp = await Units.find({
+                _id: { $in: units },
+                squad: {
+                    $eq: String(leader._id),  // равно leader._id
+                    $ne: String(secondLeader._id)   // и не равно second._id
+                }
+            });
+
+            if(lesderUp.length !== 0){
+                const leaderId = lesderUp.flatMap(e => e._id)
+
+                await Units.updateMany({_id: {$in: leaderId}}, {$addToSet: {'moreSecond': second._id}})
+            }
+
 
             const secondUp = await Units.find({
                 _id: {$in: units},
-                squad: String(squads._id)  // Проверяем, есть ли такой ID в squad
+                squad: String(secondLeader._id)  // Проверяем, есть ли такой ID в squad
             });
+
 
             if (secondUp.length !== 0) {
 
                 const secondsId = secondUp.flatMap(e => e._id)
 
                 if (!ststus) {
-                    await Units.updateMany({_id: {$in: units}}, {$addToSet: {'moreSecond': second._id}})
+                    // await Units.updateMany({_id: {$in: units}}, {$addToSet: {'moreSecond': second._id}})
                 } else {
                     await Units.updateMany({_id: {$in: secondsId}}, {$addToSet: {'moreLeader': second._id}})
                 }
-
-            } else {
-                console.log('Ne secondUp')
-                console.log(ststus)
-                console.log(units)
-                console.log(secondUp)
-                const secondUp2 = await Units.find({
-                    _id: {$in: units},
-                    squad: String(squads._id)  // Проверяем, есть ли такой ID в squad
-                });
-
-                if (secondUp2.length !== 0) {
-
-                    const secondsId = secondUp2.flatMap(e => e._id)
-
-                    if (!ststus) {
-                        await Units.updateMany({_id: {$in: units}}, {$addToSet: {'moreSecond': second._id}})
-                    } else {
-                        await Units.updateMany({_id: {$in: secondsId}}, {$addToSet: {'moreLeader': second._id}})
-                    }
-
-                }
-
 
             }
 
@@ -247,7 +242,6 @@ class Squads {
             const attach = second.attach
             const attachTransport = second.attachTransport
             // canBeEmbarkedCount
-
 
             await Units.bulkWrite([
                 {
@@ -459,6 +453,8 @@ class Squads {
             const {leader, status} = req.body
 
             if (!status) {
+                const le = await Units.findOne({_id: leader})
+
                 await Units.findOneAndUpdate({_id: leader}, {$pull: {'moreSecond': req.params.id}})
             } else {
                 await Units.findOneAndUpdate({_id: leader}, {$pull: {'moreLeader': req.params.id}})
@@ -602,7 +598,6 @@ class Squads {
 
             const leader = attach.leader
             const attachTransport = attach.attachTransport
-
 
             await Units.bulkWrite([
                 {

@@ -6,6 +6,7 @@ const AddedUnits = require('../models/AddedUnits')
 
 const fsPromises = require('fs/promises');
 const fs = require('fs');
+const Squad = require("../models/Squad");
 
 class Unit {
 
@@ -548,6 +549,58 @@ class Unit {
             )
             res.json(units)
         } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async pastAttachForUnits(req,res){
+        try {
+            const{attach,option} = req.body
+
+            if(option === 'attach'){
+                const unit =  await Units.findOne({_id:req.params.id})
+
+                await Units.updateMany({_id:{$in:attach}},{$push:{'attach':String(req.params.id)}})
+
+                await Units.findOneAndUpdate({_id:req.params.id},{$set:{'leader':attach}})
+            }
+
+            if(option === 'leader'){
+                await Units.updateMany({_id:{$in:attach}},{$push:{'leader':String(req.params.id)}})
+            }
+
+            if(option === 'second'){
+
+                const squads = await Squad.findOne({squad: '2nd Leader'})
+
+                const unitIds = await Units.find(
+                    {
+                        _id: { $in: attach },
+                        squad: squads._id
+                    },
+                    { _id: 1 } // Проекция - только поле _id
+                ).lean().then(units => units.map(u => u._id));
+
+                if(unitIds.length !== 0){
+                    await Units.updateMany({_id:{$in:unitIds}},{$push:{'moreLeader':String(req.params.id)}})
+                }
+
+            }
+
+
+
+            // attachTransport
+
+            // console.log(unit)
+            // console.log(attach)
+
+
+
+
+            res.status(200).json({error: false, message: "Past attach for units"})
+
+        }catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
@@ -1977,7 +2030,7 @@ class Unit {
             const unitFreePts = []
 /////////// SAME Units ////////////////
             const sameUnits = await Units.find({originUnitId: req.params.id,sameUnit:true})
-            console.log(sameUnits)
+
             if (sameUnits.length !== 0) {
                 let unit = {
                     categoryId: originUnit.categoryId,
@@ -2178,6 +2231,9 @@ class Unit {
 
             //////////////
 
+
+            const addedArmy1 = await AddedArmy.find({unitId: req.params.id})
+            // console.log(addedArmy1)
             //Обновляем squad ////
 
             if (addedArmy.length !== 0) {
@@ -2411,6 +2467,49 @@ class Unit {
 
                     }
 
+                    const attachUnit = joinUnit.filter(e => e.attachLeader && e.position === 4)
+
+                    if(attachUnit.length !== 0){
+
+
+                        const leaderId = attachUnit.flatMap(e => e.attachLeader)
+
+                        const unitsToProcess = await AddedArmy.find({_id: {$in: leaderId}});
+
+                        const unitNotAttach = unitsToProcess.filter(e => !originUnit.leader.includes(e.unitId))
+
+                        if (unitNotAttach.length !== 0) {
+                            const leader = unitNotAttach.flatMap(e => e._id)
+                            const leaderAttachUnits = unitNotAttach.flatMap(e => e.attachUnits)
+
+                            await AddedArmy.updateMany(
+                                {_id: {$in: leader}},
+                                {
+                                    $set: {
+                                        join: false,
+                                        attachUnits: [],
+                                    }
+                                }
+                            );
+
+                            await AddedArmy.updateMany(
+                                {_id: {$in: leaderAttachUnits}},
+                                [
+                                    {
+                                        $set: {
+                                            join: false,
+                                            attachLeader: "",
+                                            categoryId: "$originCategory"
+                                        }
+                                    }
+                                ]
+                            );
+
+
+                            await processDisembark(unitNotAttach, leaderAttachUnits)
+                        }
+                    }
+
                     const transportAttachUnits = joinUnit.filter(e => e.attachUnitsForTransport.length !== 0 && e.position === 1)
                     if (transportAttachUnits.length !== 0) {
 
@@ -2481,7 +2580,6 @@ class Unit {
 
                     const transportEmbark = unitsToEmbark.filter(e => notJoinUnit.some(el => e.attachUnitsForTransport.includes(el._id)))
 
-                    console.log(transportEmbark)
                     if (transportEmbark.length !== 0) {
                         await removeOverfilledTransports(transportEmbark)
                     }
@@ -2780,7 +2878,6 @@ class Unit {
             async function processDisembark(attachNotAttach, units) {
                 console.log('processDisembark')
                 const attachTransportId = attachNotAttach.flatMap(e => e.attachTransport)
-
                 if (attachTransportId.length !== 0) {
 
                     const unitsToProcessTransport = await AddedArmy.find({unitId: {$in: attachTransportId}});

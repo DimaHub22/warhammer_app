@@ -19,6 +19,7 @@ router.get('/search-squad/search/unit', Unit.searchSquadUnit)
 
 router.get('/search-transport/transport', Unit.searchSquadUnitTransport)
 
+router.patch('/past-attach-units/:id',Unit.pastAttachForUnits)
 
 
 router.patch('/:id', upload.single('image'), Unit.updateUnit)
