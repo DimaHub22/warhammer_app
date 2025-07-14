@@ -596,8 +596,10 @@ class Squads {
 
             const attach = await Units.findOne({_id: req.params.id})
 
+            const squads = await Squad.findOne({squad: 'Attach'})
+
             const leader = attach.leader
-            const attachTransport = attach.attachTransport
+            // const attachTransport = attach.attachTransport
 
             await Units.bulkWrite([
                 {
@@ -610,16 +612,16 @@ class Squads {
                         }
                     }
                 },
-                {
-                    updateMany: {
-                        filter: {_id: {$in: attachTransport}},
-                        update: {
-                            $pull: {
-                                attachUnitTransport: req.params.id,
-                            }
-                        }
-                    }
-                },
+                // {
+                //     updateMany: {
+                //         filter: {_id: {$in: attachTransport}},
+                //         update: {
+                //             $pull: {
+                //                 attachUnitTransport: req.params.id,
+                //             }
+                //         }
+                //     }
+                // },
             ]);
 
 
@@ -628,12 +630,13 @@ class Squads {
                 {
                     $set: {
                         'leader': [],
-                        'attachTransport': [],
-                        'squad': [],
+                        // 'attachTransport': [],
+                        // 'squad': [],
                         // 'attach': [],
-                        'canBeEmbarkedCount.count': 0,
-                        'canBeEmbarkedCount.checked': false
+                        // 'canBeEmbarkedCount.count': 0,
+                        // 'canBeEmbarkedCount.checked': false
                     },
+                    $pull:{'squad':squads._id}
                 },
                 {new: true}
             )
