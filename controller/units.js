@@ -2122,7 +2122,7 @@ class Unit {
             if (addedArmy.length !== 0) {
 
                 let unit = {
-                    // categoryId: req.body.categoryId,
+                    // categoryId: originUnit.categoryId,
                     originCategory: originUnit.categoryId,
                     canBeEmbarkedCount: originUnit.canBeEmbarkedCount,
                     name: originUnit.name,
@@ -2145,19 +2145,28 @@ class Unit {
                     sameCodex: originUnit.sameCodex
 
                 }
+                // await AddedArmy.updateMany(
+                //     {unitId: req.params.id},
+                //     {$set: unit},
+                // )
+
                 await AddedArmy.updateMany(
-                    {unitId: req.params.id},
-                    {$set: unit},
-                )
+                    { unitId: req.params.id, join: false },
+                    { $set: { ...unit, categoryId: originUnit.categoryId } }
+                );
+
+                await AddedArmy.updateMany(
+                    { unitId: req.params.id, join: true },
+                    { $set: { ...unit, originCategory: originUnit.categoryId } }
+                );
 
             } //////Origin
 
             ///////
 
             if (armySame) {
-
                 let unit = {
-                    // categoryId: req.body.categoryId,
+                    // categoryId: armySame.categoryId,
                     originCategory: armySame.categoryId,
                     canBeEmbarkedCount: armySame.canBeEmbarkedCount,
                     name: armySame.name,
@@ -2183,10 +2192,20 @@ class Unit {
 
                 }
 
+                // await AddedArmy.updateMany(
+                //     {originUnitId: req.params.id},
+                //     {$set: unit},
+                // )
+
                 await AddedArmy.updateMany(
-                    {originUnitId: req.params.id},
-                    {$set: unit},
-                )
+                    { originUnitId: req.params.id, join: false },
+                    { $set: { ...unit, categoryId: armySame.categoryId } }
+                );
+
+                await AddedArmy.updateMany(
+                    { originUnitId: req.params.id, join: true },
+                    { $set: { ...unit, originCategory: armySame.categoryId } }
+                );
 
             } //////Same
             ////////////////
@@ -2232,7 +2251,7 @@ class Unit {
             //////////////
 
 
-            const addedArmy1 = await AddedArmy.find({unitId: req.params.id})
+            // const addedArmy1 = await AddedArmy.find({unitId: req.params.id})
             // console.log(addedArmy1)
             //Обновляем squad ////
 
