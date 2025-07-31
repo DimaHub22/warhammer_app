@@ -262,6 +262,27 @@ class AddUnit {
         }
     }
 
+    async updateDetachment(req,res){
+        try {
+            const {detachment} = req.body
+
+            await AddedUnits.findOneAndUpdate(
+                {_id: req.params.id},
+                {$set: { "detachment": detachment}},
+                {new: true}
+            )
+
+            await AddedArmy.updateMany({'codexId': req.params.id},
+                {$set: {'enchantmentUnit': {}}})
+
+            res.status(200).json({error: false, message: "Update access"})
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
 
 }
 

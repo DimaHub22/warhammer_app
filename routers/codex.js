@@ -31,6 +31,10 @@ router.patch('/delete-choice-content/:id',Codex.deleteContent)
 router.patch('/delete-choice-detachment/:id',Codex.deleteDetachment)
 router.patch('/delete-choice-enhancement/:id',Codex.deleteContentEnhancement)
 
+router.patch('/update-stratagem/:id',Codex.updateContentStrategem)
+router.patch('/update-choice-content-stratagem/:id',Codex.editContentStratagem)
+router.patch('/delete-choice-stratagem/:id',Codex.deleteContentStratagem)
+
 router.patch('/shared-same-codex-choice/:id',Codex.sharedSameCodexs)
 router.patch('/shared-same-codex',Codex.sharedSameCodex)
 

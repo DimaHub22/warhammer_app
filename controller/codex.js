@@ -216,7 +216,9 @@ class Codexes {
         try {
 
             const content = {
-                content: req.body.content
+                content: req.body.content,
+                name:req.body.name,
+                color:req.body.color
             };
 
             const codexUp = await Codex.findOneAndUpdate({'items._id': req.params.id},
@@ -234,7 +236,8 @@ class Codexes {
         try {
             const content = {
                 title: req.body.title,
-                detachment: req.body.detachment
+                detachment: req.body.detachment,
+                color:req.body.color
             };
             const codexUp = await Codex.findOneAndUpdate({'items._id': req.params.id},
                 {$push: {'items.$.detachments': content}})
@@ -255,7 +258,8 @@ class Codexes {
                 content: req.body.content,
                 detachmentId: req.body.detachmentId,
                 enchantPts: req.body.enchantPts,
-                name: req.body.name
+                name: req.body.name,
+                color:req.body.color
             };
 
             const codexUp = await Codex.findOneAndUpdate({'items._id': req.params.id},
@@ -264,6 +268,28 @@ class Codexes {
             res.status(201).json({error: false, message: "Codex successfully created"})
 
         } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async updateContentStrategem(req,res){
+        try {
+
+            const content = {
+                content: req.body.content,
+                detachmentId: req.body.detachmentId,
+                pcCost: req.body.pcCost,
+                name: req.body.name,
+                color:req.body.color
+            };
+
+            const codexUp = await Codex.findOneAndUpdate({'items._id': req.params.id},
+                {$push: {'items.$.stratagems': content}})
+
+            res.status(201).json({error: false, message: "Codex successfully created"})
+
+        }catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
@@ -282,6 +308,8 @@ class Codexes {
                 {
                     $set: {
                         'items.$[item].rules.$[rule].content': req.body.content,
+                        'items.$[item].rules.$[rule].name': req.body.name,
+                        'items.$[item].rules.$[rule].color': req.body.color,
                     },
                 },
                 {
@@ -319,6 +347,7 @@ class Codexes {
                         'items.$[item].enhancements.$[rule].content': req.body.content,
                         'items.$[item].enhancements.$[rule].enchantPts': req.body.enchantPts,
                         'items.$[item].enhancements.$[rule].name': req.body.name,
+                        'items.$[item].enhancements.$[rule].color': req.body.color,
 
                     },
                 },
@@ -343,10 +372,51 @@ class Codexes {
         }
     }
 
+    async editContentStratagem(req,res){
+        try {
+
+            const {itemId, detachmentId, content, pcCost} = req.body;
+
+            const result = await Codex.findOneAndUpdate(
+                {
+                    _id: req.params.id,
+                    'items._id': itemId,
+                    'items.stratagems._id': detachmentId,
+                },
+                {
+                    $set: {
+                        'items.$[item].stratagems.$[rule].content': req.body.content,
+                        'items.$[item].stratagems.$[rule].pcCost': req.body.pcCost,
+                        'items.$[item].stratagems.$[rule].name': req.body.name,
+                        'items.$[item].stratagems.$[rule].color': req.body.color,
+
+                    },
+                },
+                {
+                    arrayFilters: [
+                        {'item._id': itemId}, // Фильтр для элемента в массиве items
+                        {'rule._id': detachmentId}, // Фильтр для элемента в массиве rules
+                    ],
+                    new: true, // Возвращает обновленный документ
+                }
+            );
+
+            // const units = await AddedArmy.updateMany({'enchantmentUnit.enchantId': detachmentId},
+            //     {$set: {"enchantmentUnit.name": req.body.name, "enchantmentUnit.enchantPts": req.body.enchantPts}})
+
+
+            res.status(200).json({error: false, message: "Codex successfully update"})
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
     async editContentDetachment(req, res) {
         try {
 
-            const {itemId, detachmentId, detachment} = req.body;
+            const {itemId, detachmentId,color,detachment} = req.body;
 
             const result = await Codex.findOneAndUpdate(
                 {
@@ -356,6 +426,7 @@ class Codexes {
                 },
                 {
                     $set: {
+                        'items.$[item].detachments.$[rule].color': req.body.color,
                         'items.$[item].detachments.$[rule].detachment': req.body.detachment,
                     },
                 },
@@ -377,7 +448,7 @@ class Codexes {
 
     async updateDetachmentTitle(req, res) {
         try {
-            const {itemId, detachmentId, title} = req.body;
+            const {itemId, detachmentId, color,title} = req.body;
 
             const result = await Codex.findOneAndUpdate(
                 {
@@ -387,6 +458,7 @@ class Codexes {
                 },
                 {
                     $set: {
+                        'items.$[item].detachments.$[rule].color': req.body.color,
                         'items.$[item].detachments.$[rule].title': req.body.title,
                     },
                 },
@@ -455,6 +527,33 @@ class Codexes {
             res.status(200).json({error: false, message: "Codex successfully delete"})
 
         } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async deleteContentStratagem(req,res){
+        try {
+
+            const {itemId, detachmentId} = req.body;
+
+            const result = await Codex.findOneAndUpdate(
+                {
+                    _id: req.params.id,
+                    'items._id': itemId,
+                },
+                {
+                    $pull: {
+                        'items.$.stratagems': {_id: detachmentId}, // Удаляем правило по ID
+                    },
+                },
+                {
+                    new: true,
+                })
+
+            res.status(200).json({error: false, message: "Codex successfully delete"})
+
+        }catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
@@ -619,7 +718,8 @@ class Codexes {
                 {
                     $pull: {
                         'items.$.detachments': {_id: detachmentId}, // Удаляем правило по ID
-                        'items.$.enhancements': {detachmentId: detachmentId}
+                        'items.$.enhancements': {detachmentId: detachmentId},
+                        'items.$.stratagems': {detachmentId: detachmentId},
                     },
                 },
                 {
