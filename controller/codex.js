@@ -4,6 +4,8 @@ const AddedUnits = require('../models/AddedUnits')
 const SameCodex = require('../models/SameCodex')
 const Units = require('../models/Units')
 
+const { ObjectId } = require('mongodb');
+
 class Codexes {
     async createCodex(req, res) {
         try {
@@ -418,6 +420,7 @@ class Codexes {
 
             const {itemId, detachmentId,color,detachment} = req.body;
 
+
             const result = await Codex.findOneAndUpdate(
                 {
                     _id: req.params.id,
@@ -438,6 +441,35 @@ class Codexes {
                     new: true, // Возвращает обновленный документ
                 }
             );
+
+            await Codex.updateMany(
+                {
+                    "items.detachments._id": detachmentId,
+                    "items.detachments.shared": true
+                },
+                {
+                    $set: {
+                        "items.$[item].detachments.$[detach].color": req.body.color,
+                        "items.$[item].detachments.$[detach].detachment": req.body.detachment
+                    }
+                },
+                {
+                    arrayFilters: [
+                        {
+                            "item.detachments._id": detachmentId,
+                            "item.detachments.shared": true
+                        },
+                        {
+                            "detach._id": detachmentId,
+                            "detach.shared": true
+                        }
+                    ],
+                }
+            );
+
+
+
+
 
             res.status(200).json({error: false, message: "Codex successfully update"})
         } catch (e) {
@@ -468,6 +500,31 @@ class Codexes {
                         {'rule._id': detachmentId}, // Фильтр для элемента в массиве rules
                     ],
                     new: true, // Возвращает обновленный документ
+                }
+            );
+
+            await Codex.updateMany(
+                {
+                    "items.detachments._id": detachmentId,
+                    "items.detachments.shared": true
+                },
+                {
+                    $set: {
+                        "items.$[item].detachments.$[detach].color": req.body.color,
+                        "items.$[item].detachments.$[detach].title": req.body.title
+                    }
+                },
+                {
+                    arrayFilters: [
+                        {
+                            "item.detachments._id": detachmentId,
+                            "item.detachments.shared": true
+                        },
+                        {
+                            "detach._id": detachmentId,
+                            "detach.shared": true
+                        }
+                    ],
                 }
             );
 
