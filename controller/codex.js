@@ -201,12 +201,44 @@ class Codexes {
                 {
                     $project: {
                         _id: 0, // Исключаем служебные поля
-                        enhancement: "$items.enhancements",
+                        enhancements: "$items.enhancements",
                     }
                 }
             ]);
 
             res.status(200).json(matchingEnhancements)
+
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async getStratagems(req, res) {
+        try {
+
+            const {itemId, detachment} = req.body;
+
+            const stratagems = await Codex.aggregate([
+                // 1. Разворачиваем массив items
+                {$unwind: "$items"},
+
+                // 2. Разворачиваем массив enhancements
+                {$unwind: "$items.stratagems"},
+
+                // 3. Фильтруем только enhancements с нужным detachmentId
+                {$match: {"items.stratagems.detachmentId": req.params.id}},
+
+                // 4. Формируем результат (только нужные данные)
+                {
+                    $project: {
+                        _id: 0, // Исключаем служебные поля
+                        stratagems: "$items.stratagems",
+                    }
+                }
+            ]);
+
+            res.status(200).json(stratagems)
 
         } catch (e) {
             console.log(e)

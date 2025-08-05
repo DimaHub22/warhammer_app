@@ -10,6 +10,7 @@ router.get('/added-shared/codex', Codex.getSharedSameCodex)
 router.get('/my-codex/:id', Codex.getCodexIdFromItems)
 router.get('/enchant-codex/:id', Codex.getEnchants)
 router.get('/my-enchants/:id', Codex.getCodexItems)
+router.get('/my-stratagems/:id', Codex.getStratagems)
 
 router.get('/category/:id', Codex.getIdCodex)
 
