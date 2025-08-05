@@ -201,7 +201,7 @@ class Codexes {
                 {
                     $project: {
                         _id: 0, // Исключаем служебные поля
-                        enhancements: "$items.enhancements",
+                        enhancement: "$items.enhancements",
                     }
                 }
             ]);
