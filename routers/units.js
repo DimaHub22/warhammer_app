@@ -36,6 +36,7 @@ router.patch('/update-codex-allied/:id',Unit.deleteUnitForAlliedUnits)
 
 router.patch('/delete-enchancement-unit/:id',Unit.deleteEnchantForAddedUnits)
 
+router.patch('/delete-screen/:id', Unit.deleteScreen )
 
 
 

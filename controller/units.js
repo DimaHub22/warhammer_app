@@ -4,9 +4,12 @@ const {ObjectId} = require('mongodb');
 
 const AddedUnits = require('../models/AddedUnits')
 
-const fsPromises = require('fs/promises');
-const fs = require('fs');
+// const fsPromises = require('fs/promises');
+// const fs = require('fs');
 const Squad = require("../models/Squad");
+
+const fs = require('fs');
+const path = require('path');
 
 class Unit {
 
@@ -3110,6 +3113,53 @@ class Unit {
 
             res.status(200).json({error: false, message: "Update enchant"})
         } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async deleteScreen(req,res){
+        try {
+
+            const {image,screen} = req.body
+
+            const absolutePath = path.resolve(__dirname, '../' + image); // Преобразуем в абсолютный
+
+            if (fs.existsSync(absolutePath)) {
+                console.log('✅ Файл найден!');
+                // Удаление файла
+                fs.unlink(absolutePath, (err) => {
+                    if (err) {
+                        console.error('Ошибка удаления:', err);
+                    } else {
+                        console.log('Файл успешно удалён');
+
+                    }
+                });
+            } else {
+                console.log('❌ Файл не найден. Проверьте:');
+                // console.log('1. Существует ли папка uploads в корне проекта?');
+                // console.log('2. Правильно ли имя файла? (регистр, расширение)');
+            }
+
+            if(screen === 0){
+                await Units.findOneAndUpdate({_id:req.params.id},{$set:{'image':''}})
+            }
+
+            if(screen === 1){
+                await Units.findOneAndUpdate({_id:req.params.id},{$set:{'screenshotOne':''}})
+            }
+
+            if(screen === 2){
+                await Units.findOneAndUpdate({_id:req.params.id},{$set:{'screenshotSecond':''}})
+            }
+
+
+
+            console.log(image)
+            console.log(screen)
+            res.status(200).json({error: false, message: "Delete screen"})
+        }catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
