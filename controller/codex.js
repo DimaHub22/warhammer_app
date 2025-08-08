@@ -797,8 +797,8 @@ class Codexes {
                 { "items.enhancements.$": 1 } // Проекция для точного совпадения
             );
 
-            const enhancementId = String(enhancement?.items?.[0]?.enhancements?.[0]?._id);
-            const enhancementIdArr = enhancement?.items?.[0].enhancements.flatMap(e => String(e._id))
+            // const enhancementId = String(enhancement?.items?.[0]?.enhancements?.[0]?._id);
+            const enhancementIdArr = enhancement?.items?.[0].enhancements.filter(e =>  e.detachmentId ===detachmentId ).flatMap(el => String(el._id) )
             console.log(enhancementIdArr)
             const result = await Codex.findOneAndUpdate(
                 {
