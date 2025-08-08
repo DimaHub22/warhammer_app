@@ -798,7 +798,8 @@ class Codexes {
             );
 
             const enhancementId = String(enhancement?.items?.[0]?.enhancements?.[0]?._id);
-
+            const enhancementIdArr = enhancement?.items?.[0].enhancements.flatMap(e => String(e._id))
+            console.log(enhancementIdArr)
             const result = await Codex.findOneAndUpdate(
                 {
                     _id: req.params.id,
@@ -819,8 +820,9 @@ class Codexes {
 
                 const codex = await AddedUnits.find({detachment: detachmentId, idCodex: codexId})
 
-                const units = await Units.updateMany({ race: codexId },{$pull:{'enchancements':enhancementId}})
+                // const units = await Units.updateMany({ race: codexId },{$pull:{'enchancements':enhancementId}})
 
+                const units = await Units.updateMany({ race: codexId },{$pull:{'enchancements':{$in:enhancementIdArr}}})
 
                 if (codex.length !== 0) {
 
