@@ -159,7 +159,6 @@ class Codexes {
 
     async getEnchants(req, res) {
         try {
-
             const codex = await Codex.findOne({'items._id': req.params.id}, {"items.$": 1})
             const detachId = codex.items.flatMap(e => e.detachments.flatMap(el => String(el._id)))
 
@@ -641,6 +640,48 @@ class Codexes {
                 })
 
             res.status(200).json({error: false, message: "Codex successfully delete"})
+
+        }catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async saveOrder(req,res){
+        try {
+            const {itemId,staratagems} = req.body
+
+
+
+            const result = await Codex.updateOne(
+                {
+                    _id: req.params.id,
+                    'items._id': itemId,
+                },
+                {
+                    $set: {
+                        'items.$.stratagems': staratagems, // Удаляем правило по ID
+                    },
+                },
+                {
+                    new: true,
+                })
+
+            // const stratagems = await Codex.findOne({
+            //     _id: req.params.id,
+            //     'items._id': itemId,
+            //     // 'items.stratagems.detachmentId': detachmentId
+            // },
+            // {
+            //     'items.$': 1  // Проекция: возвращаем только соответствующий элемент массива
+            // }
+            // )
+            //
+            // console.log(stratagems.items[0].stratagems)
+
+
+
+            res.status(200).json({error: false, message: "Order successfully save"})
 
         }catch (e) {
             console.log(e)

@@ -39,6 +39,8 @@ router.patch('/delete-choice-stratagem/:id',Codex.deleteContentStratagem)
 router.patch('/shared-same-codex-choice/:id',Codex.sharedSameCodexs)
 router.patch('/shared-same-codex',Codex.sharedSameCodex)
 
+router.patch('/save-order-stratagem/:id',Codex.saveOrder)
+
 router.delete('/delete-codex/:id', Codex.deleteCodex)
 router.delete('/delete-category/:id', Codex.deleteCategory)
 

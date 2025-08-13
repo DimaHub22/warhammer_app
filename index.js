@@ -13,6 +13,7 @@ const addedArmy = require('./routers/addedArmy')
 const keyWords = require('./routers/keyWorlds')
 const model = require('./routers/models')
 const squad = require('./routers/squad')
+const core = require('./routers/coreStratagem')
 
 
 const PORT = process.env.PORT || 5000
@@ -68,6 +69,7 @@ app.use('/addedArmy', addedArmy)
 app.use('/keyWord', keyWords)
 app.use('/model', model)
 app.use('/squad',squad)
+app.use('/core',core)
 
 
 const start = async () => {
