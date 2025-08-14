@@ -649,36 +649,38 @@ class Codexes {
 
     async saveOrder(req,res){
         try {
-            const {itemId,staratagems} = req.body
+            const {itemId,staratagems,detachId} = req.body
 
-
-
-            const result = await Codex.updateOne(
+            const resultDelete = await Codex.findOneAndUpdate(
                 {
                     _id: req.params.id,
                     'items._id': itemId,
                 },
                 {
-                    $set: {
-                        'items.$.stratagems': staratagems, // Удаляем правило по ID
+                    $pull: {
+                        'items.$.stratagems':{detachmentId: detachId}
                     },
                 },
                 {
                     new: true,
                 })
 
-            // const stratagems = await Codex.findOne({
-            //     _id: req.params.id,
-            //     'items._id': itemId,
-            //     // 'items.stratagems.detachmentId': detachmentId
-            // },
-            // {
-            //     'items.$': 1  // Проекция: возвращаем только соответствующий элемент массива
-            // }
-            // )
-            //
-            // console.log(stratagems.items[0].stratagems)
 
+            const resultUpdate = await Codex.updateOne(
+                {
+                    _id: req.params.id,
+                    'items._id': itemId,
+                },
+                {
+                    $push: {
+                        'items.$.stratagems': {
+                            $each: staratagems // Используем $each для добавления всех элементов массива
+                        }
+                    }
+                },
+                {
+                    new: true,
+                })
 
 
             res.status(200).json({error: false, message: "Order successfully save"})
