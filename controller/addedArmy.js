@@ -223,9 +223,9 @@ class AddArmy {
                     attachTransport: item.attachTransport,
                     attachUnitsForTransport: item.attachUnitsForTransport,
                     attach: item.attach,
-                    originUnitId:item.originUnitId,
-                    sameUnit:item.sameUnit,
-                    allideUnit:item.allideUnit,
+                    originUnitId: item.originUnitId,
+                    sameUnit: item.sameUnit,
+                    allideUnit: item.allideUnit,
                     // enchantmentUnit: {
                     //     name:item.enchantmentUnit.name,
                     //     detachmentId:item.enchantmentUnit.detachmentId,
@@ -304,7 +304,7 @@ class AddArmy {
 
     async getArmyOfCodex(req, res) {
         try {
-            
+
             const units = await AddedArmy.find({race: req.params.race, codexId: req.params.codexId})
 
             const alliedUnits = await AddedArmy.find({
@@ -888,6 +888,29 @@ class AddArmy {
 
             res.status(200).json({error: false, message: "Update enchantment"})
 
+        } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+
+    async isReservers(req, res) {
+        try {
+
+            const {isReserve, id, ids} = req.body
+            console.log( req.body)
+            if (id) {
+                await AddedArmy.findOneAndUpdate({_id: id},
+                    {$set: {'isReserves': isReserve}})
+            }
+            if (ids.length !== 0) {
+
+               await AddedArmy.updateMany({_id: {$in: ids}},
+                   {$set: {'isReserves': isReserve}})
+            }
+
+            res.status(200).json({error: false, message: "Reservers update"})
         } catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})

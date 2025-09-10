@@ -67,7 +67,11 @@ const Unit = new Schema({
     sameCodex:[String],
     sameUnit:{type:Boolean, default: false},
     allideUnit:{type:Boolean, default: false},
-    originUnitId:String
+    originUnitId:String,
+    strategic:{
+        deepReserve:{type:Boolean, default: false},
+        notReserve:{type:Boolean, default: false}
+    }
 
 
 })

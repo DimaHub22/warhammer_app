@@ -63,6 +63,7 @@ const AddedArmy = new Schema({
     originUnitId:String,
     sameUnit:{type:Boolean, default: false},
     allideUnit:{type:Boolean, default: false},
+    isReserves:Boolean
 
 })
 

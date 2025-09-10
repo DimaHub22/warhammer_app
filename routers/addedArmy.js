@@ -31,6 +31,7 @@ router.patch('/detach-units/:id', AddedArmy.detachUnits)
 
 router.patch('/attach-leader-squad/:id',AddedArmy.addAttachLeaderForSquad)
 
+router.post('/is-reserve', AddedArmy.isReservers)
 
 
 

@@ -1119,7 +1119,7 @@ class Unit {
 
             }
             async function removeOverfilledTransports(transportAttachUnits) {
-                console.log('removeOverfilledTransports')
+                console.log('removeOverfilledTransports 777')
                 const validTransports = await Promise.all(
                     transportAttachUnits.map(async t => {
 
@@ -1321,6 +1321,20 @@ class Unit {
 
             res.status(200).json({error: false, message: "Update allide units"})
         } catch (e) {
+            console.log(e)
+            res.status(400).json({error: true, message: "Error service"})
+        }
+    }
+
+    async strategics(req,res){
+        try {
+
+            await Units.findOneAndUpdate({_id: req.params.id},
+                {$set: {'strategic': req.body.strategic}})
+
+
+            res.status(200).json({error: false, message: "Update strategic"})
+        }catch (e) {
             console.log(e)
             res.status(400).json({error: true, message: "Error service"})
         }
@@ -1816,7 +1830,7 @@ class Unit {
 
             }
             async function removeOverfilledTransports(transportAttachUnits) {
-                console.log('removeOverfilledTransports')
+                console.log('removeOverfilledTransports 555')
                 const validTransports = await Promise.all(
                     transportAttachUnits.map(async t => {
 
@@ -2152,12 +2166,12 @@ class Unit {
                 //     {unitId: req.params.id},
                 //     {$set: unit},
                 // )
-
+              //////////////////// Нужно решить проблему, когда юнит не join и в транспорте при обновлении вылетает юнит
                 await AddedArmy.updateMany(
                     { unitId: req.params.id, join: false },
                     { $set: { ...unit, categoryId: originUnit.categoryId } }
                 );
-
+////////////////////////////////////////////////////////////////////////////////////////////
                 await AddedArmy.updateMany(
                     { unitId: req.params.id, join: true },
                     { $set: { ...unit, originCategory: originUnit.categoryId } }
@@ -2454,6 +2468,7 @@ class Unit {
 
 
                         if (unitNotAttach.length !== 0) {
+
                             const leader = unitNotAttach.flatMap(e => e.attachLeader)
 
                             const leaderAttach = await AddedArmy.find({_id: {$in: leader}});
@@ -2549,6 +2564,7 @@ class Unit {
                             const transportUnits = transportAttachUnits.filter(e => e.attachUnitsForTransport.some(el => attachUnit.includes(el))).flatMap(e => e._id)
 
                             if (transportUnits.length !== 0) {
+
                                 await AddedArmy.updateMany(
                                     {_id: {$in: transportUnits}},
                                     [
@@ -2932,7 +2948,6 @@ class Unit {
 
             async function validateAndFixTransports(transportAttachUnits) {
                 console.log('validateAndFixTransports ее')
-                console.log(transportAttachUnits)
                 const validTransports = await Promise.all(
                     transportAttachUnits.map(async t => {
 
@@ -3033,6 +3048,7 @@ class Unit {
                     }
 
                     if (resId.some(e => !e.change)) {
+
                         const transportId = resId.filter(e => !e.change).flatMap(e => e.id)
 
                         await AddedArmy.updateMany(
@@ -3138,8 +3154,6 @@ class Unit {
                 });
             } else {
                 console.log('❌ Файл не найден. Проверьте:');
-                // console.log('1. Существует ли папка uploads в корне проекта?');
-                // console.log('2. Правильно ли имя файла? (регистр, расширение)');
             }
 
             if(screen === 0){
@@ -3155,9 +3169,6 @@ class Unit {
             }
 
 
-
-            console.log(image)
-            console.log(screen)
             res.status(200).json({error: false, message: "Delete screen"})
         }catch (e) {
             console.log(e)

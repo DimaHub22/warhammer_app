@@ -34,6 +34,8 @@ router.post('/update-same-new',Unit.updateNewSameCodex)
 router.patch('/update-codex-same/:id',Unit.deleteUnitForSameCodex)
 router.patch('/update-codex-allied/:id',Unit.deleteUnitForAlliedUnits)
 
+router.patch('/strategics/:id',Unit.strategics)
+
 router.patch('/delete-enchancement-unit/:id',Unit.deleteEnchantForAddedUnits)
 
 router.patch('/delete-screen/:id', Unit.deleteScreen )
