@@ -642,7 +642,7 @@ class Unit {
     async updateNewAlliedUnits(req,res){
         try {
 
-            const {id,unit, alliedUnits, categoryAllide} = req.body
+            const {id,unit, alliedUnits, categoryAllide,codexId} = req.body
 
             const newUnits = alliedUnits.map(codexEntry => {
                 const {_id, ...unitWithoutId} = unit;
@@ -661,10 +661,11 @@ class Unit {
                     attachUnitTransport:[],
                     canBeEmbarkedCount: {count: 0, checked: false},
                     allideUnit: true,
-                    originUnitId: unit._id
+                    originUnitId: unit._id,
+                    defaultCodex:codexId
                 };
             });
-
+            console.log(newUnits)
             const addedAlliedUnits = await Units.find({race: {$in: alliedUnits}, allideUnit: true})
 
 

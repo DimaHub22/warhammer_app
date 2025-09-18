@@ -71,7 +71,9 @@ const Unit = new Schema({
     strategic:{
         deepReserve:{type:Boolean, default: false},
         notReserve:{type:Boolean, default: false}
-    }
+    },
+    defaultCodex:String
+
 
 
 })
